@@ -1,0 +1,20 @@
+# Capstone chart values. Override per environment with -f or --set.
+web:
+  image: nginx:1.27-alpine
+  replicas: 2
+api:
+  image: hashicorp/http-echo:1.0
+  replicas: 2
+  message: "hello from the guestbook API"
+redis:
+  image: redis:7-alpine
+  storage: 128Mi
+config:
+  # Non-sensitive config injected into the API via a ConfigMap.
+  appMode: production
+secret:
+  # Sensitive value injected via a Secret (base64 handled by Kubernetes).
+  redisPassword: "s3cr3t-redis"
+ingress:
+  enabled: true
+  className: nginx

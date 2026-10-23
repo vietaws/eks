@@ -1,0 +1,23 @@
+# emptyDir: scratch space that lives as long as the Pod (not the container).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: emptydir-demo
+spec:
+  restartPolicy: Never
+  volumes:
+    - name: scratch
+      emptyDir: {}
+  containers:
+    - name: writer
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "echo 'hello from writer' > /data/msg.txt; sleep 3600"]
+      volumeMounts:
+        - name: scratch
+          mountPath: /data
+    - name: reader
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "sleep 2; cat /data/msg.txt; sleep 3600"]
+      volumeMounts:
+        - name: scratch
+          mountPath: /data

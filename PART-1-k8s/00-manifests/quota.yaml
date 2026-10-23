@@ -1,0 +1,11 @@
+# Caps the course-demo namespace at 2 Pods.
+# NOTE: if a quota sets requests.cpu/memory, every Pod MUST declare requests or
+# it's rejected. To keep this lesson about COUNT, we cap pods only.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: demo-quota
+  namespace: course-demo
+spec:
+  hard:
+    pods: "2"

@@ -1,0 +1,45 @@
+# A backend whose response identifies the Pod, so we can see load-balancing.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vietvn
+  labels:
+    app: vietvn
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vietvn
+  template:
+    metadata:
+      labels:
+        app: vietvn
+    spec:
+      containers:
+        - name: vietvn
+          image: hashicorp/http-echo:1.0
+          args:
+            - "-text=hello from $(POD_NAME)"
+            - "-listen=:5678"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vietvn
+  labels:
+    app: vietvn
+spec:
+  type: ClusterIP
+  selector:
+    app: vietvn
+  ports:
+    - name: http
+      port: 80          # Service port (stable)
+      targetPort: 5678  # container port

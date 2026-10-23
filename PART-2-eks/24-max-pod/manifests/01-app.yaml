@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  labels:
+    app: app
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ip-192-168-100-110.ap-southeast-1.compute.internal
+      containers:
+        - name: simple-app
+          image: vietaws/eks:v1

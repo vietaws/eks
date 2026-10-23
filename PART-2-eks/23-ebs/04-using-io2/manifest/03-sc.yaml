@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+parameters:
+  csi.storage.k8s.io/fstype: ext4
+  type: io2
+  blockExpress: 'false' # string type
+  iopsPerGB: '100' # string type
+  encrypted: 'true' # string type
+provisioner: ebs.csi.aws.com
+reclaimPolicy: Delete # Values: Retain | Delete (Default())
+allowVolumeExpansion: true # boolean
+volumeBindingMode: WaitForFirstConsumer

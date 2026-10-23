@@ -1,0 +1,17 @@
+# requests = what the scheduler reserves; limits = hard cap (memory over limit = OOMKill).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resources-demo
+spec:
+  restartPolicy: Never
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "32Mi"
+        limits:
+          cpu: "200m"
+          memory: "64Mi"

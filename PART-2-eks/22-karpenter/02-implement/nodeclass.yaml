@@ -1,0 +1,19 @@
+# Karpenter v1 EC2NodeClass (karpenter.sh/v1 is the stable API since Karpenter v1.0)
+cat <<EOF | envsubst | kubectl apply -f -
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  amiFamily: AL2023            # AL2 reached end-of-support 2025-11-26; use AL2023
+  role: "KarpenterNodeRole-${CLUSTER_NAME}"   # replace with your cluster name
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  # In v1, amiSelectorTerms is REQUIRED. Use an alias to track the latest EKS-optimized AMI:
+  amiSelectorTerms:
+    - alias: al2023@latest
+EOF

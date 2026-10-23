@@ -1,0 +1,18 @@
+# eksctl create cluster -f manifest/02-fp.yaml
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: vietvn # Name of the EKS Cluster
+  region: ap-southeast-1
+fargateProfiles:
+  - name: app2-fp
+    selectors:
+      # All workloads in the "app2-ns" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: ns2
+  - name: home-fp
+    selectors:
+      # label selectors will be scheduled onto Fargate:
+      - namespace: ns3
+        labels:
+          runon: fargate

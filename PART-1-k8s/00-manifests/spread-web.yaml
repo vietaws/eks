@@ -1,0 +1,28 @@
+# Pod anti-affinity: avoid placing two 'spread-web' Pods on the same node.
+# With 2 workers and 2 replicas, they should land on different nodes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spread-web
+  labels:
+    app: spread-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: spread-web
+  template:
+    metadata:
+      labels:
+        app: spread-web
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: spread-web
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine

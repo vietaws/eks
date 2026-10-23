@@ -1,0 +1,9 @@
+apiVersion: v2
+name: guestbook
+description: >
+  Capstone multi-tier app for the Kubernetes course: a web frontend, an API,
+  and a Redis datastore (StatefulSet with persistent storage), wired with a
+  ConfigMap, a Secret, Services, and an Ingress — all packaged as one Helm chart.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

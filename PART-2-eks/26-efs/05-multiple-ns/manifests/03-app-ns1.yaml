@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-ns-pvc1
+  namespace: ns1
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-ns-sc
+  volumeName: efs-pv1
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-deployment
+  namespace: ns1
+  labels:
+    app: home
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: home
+  template:
+    metadata:
+      labels:
+        app: home
+    spec:
+      containers:
+        - name: simple-home
+          image: vietaws/eks:home
+          ports:
+            - containerPort: 8080
+          command: ['/bin/sh']
+          args:
+            [
+              '-c',
+              'while true; do echo "from Deployment NS1. Hostname: $(hostname)"
+              >> /ns-logs/out.txt; sleep 5; done',
+            ]
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /ns-logs
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: efs-ns-pvc1

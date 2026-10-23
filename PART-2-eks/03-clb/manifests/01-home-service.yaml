@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-microservice
+  labels:
+    app: home-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: home-app
+  template:
+    metadata:
+      labels:
+        app: home-app
+    spec:
+      containers:
+        - name: home-app
+          image: vietaws/eks:home
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,35 @@
+# Node affinity: REQUIRE a worker node-pool, PREFER one with disktype=ssd.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affinity-web
+  labels:
+    app: affinity-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: affinity-web
+  template:
+    metadata:
+      labels:
+        app: affinity-web
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: viet.vn/node-pool
+                    operator: In
+                    values: ["general"]
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values: ["ssd"]
+      containers:
+        - name: nginx
+          image: nginx:1.27-alpine

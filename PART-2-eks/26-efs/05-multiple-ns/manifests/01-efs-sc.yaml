@@ -1,0 +1,39 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-ns-sc
+provisioner: efs.csi.aws.com
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv1
+spec:
+  capacity:
+    storage: 15Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-ns-sc # <-- match this to the StorageClass name
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-0f5eecb0ee13c850b::fsap-0c91e7e8759646c2c
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv2
+spec:
+  capacity:
+    storage: 15Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-ns-sc # <-- match this to the StorageClass name
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-0f5eecb0ee13c850b::fsap-0c91e7e8759646c2c

@@ -1,0 +1,23 @@
+# Ingress with TLS termination. The referenced Secret 'demo-tls' must be a
+# kubernetes.io/tls Secret (cert + key). See the lesson for creating one.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop-tls
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - demo.local
+      secretName: demo-tls
+  rules:
+    - host: demo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80

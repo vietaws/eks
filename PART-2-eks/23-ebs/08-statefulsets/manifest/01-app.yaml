@@ -1,0 +1,49 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: nginx
+#   labels:
+#     app: nginx
+# spec:
+#   ports:
+#     - port: 80
+#       name: web
+#   clusterIP: None
+#   selector:
+#     app: nginx
+# ---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: 'nginx'
+  replicas: 3 # by default is 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: nginx
+          image: vietaws/eks:v1
+          ports:
+            - containerPort: 8080
+              name: web
+          volumeMounts:
+            - name: data-vol
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data-vol
+      spec:
+        accessModes: ['ReadWriteOnce']
+        storageClassName: 'ebs-sc'
+        resources:
+          requests:
+            storage: 4Gi

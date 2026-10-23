@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  APP_MODE: {{ .Values.config.appMode | quote }}
+  REDIS_HOST: "{{ .Release.Name }}-redis"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-secret
+type: Opaque
+stringData:
+  REDIS_PASSWORD: {{ .Values.secret.redisPassword | quote }}

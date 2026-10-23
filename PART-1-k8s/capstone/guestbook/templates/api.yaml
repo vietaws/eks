@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels: { app: {{ .Release.Name }}-api, tier: backend }
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels: { app: {{ .Release.Name }}-api }
+  template:
+    metadata:
+      labels: { app: {{ .Release.Name }}-api, tier: backend }
+    spec:
+      containers:
+        - name: api
+          image: {{ .Values.api.image }}
+          args: ["-text={{ .Values.api.message }}", "-listen=:5678"]
+          ports: [{ containerPort: 5678 }]
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-secret
+                  key: REDIS_PASSWORD
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+spec:
+  selector: { app: {{ .Release.Name }}-api }
+  ports: [{ port: 80, targetPort: 5678 }]

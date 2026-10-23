@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: efs-app
+spec:
+  containers:
+    - name: app
+      image: centos
+      command: ['/bin/sh']
+      args:
+        [
+          '-c',
+          'while true; do echo $(TZ="Asia/Ho_Chi_Minh" date) >> /data/out.txt;
+          sleep 2; done',
+        ]
+      volumeMounts:
+        - name: persistent-storage
+          mountPath: /data
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: efs-claim

@@ -1,0 +1,17 @@
+# LoadBalancer: the type you use in the cloud. On kind there is no cloud LB,
+# so EXTERNAL-IP stays <pending> unless you run `cloud-provider-kind`.
+# See the lesson script for how to reach it on kind.
+apiVersion: v1
+kind: Service
+metadata:
+  name: vietvn-lb
+  labels:
+    app: vietvn
+spec:
+  type: LoadBalancer
+  selector:
+    app: vietvn
+  ports:
+    - name: http
+      port: 80
+      targetPort: 5678

@@ -1,0 +1,31 @@
+# A PersistentVolumeClaim. On kind, the default 'standard' StorageClass
+# (local-path) dynamically provisions a PV to satisfy it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Mi
+  # storageClassName omitted -> uses the cluster default (kind: 'standard')
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-writer
+spec:
+  restartPolicy: Never
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: data-pvc
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "echo \"written at $(date -u +%T)\" >> /data/log.txt; cat /data/log.txt; sleep 3600"]
+      volumeMounts:
+        - name: data
+          mountPath: /data

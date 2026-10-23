@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim-2
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: efs-app-2
+spec:
+  containers:
+    - name: app
+      image: vietaws/eks:v2
+      ports:
+        - containerPort: 8080
+          name: web
+      command: ['/bin/sh']
+      args:
+        [
+          '-c',
+          'while true; do echo "from App2" >> /app-logs/out.txt; sleep 5; done',
+        ]
+      volumeMounts:
+        - name: persistent-storage
+          mountPath: /app-logs
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: efs-claim-2

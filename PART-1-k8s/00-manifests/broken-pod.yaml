@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: broken
+  labels:
+    app: broken
+spec:
+  containers:
+    - name: app
+      # This tag does not exist -> ImagePullBackOff, great for debugging practice.
+      image: nginx:this-tag-does-not-exist

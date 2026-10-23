@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-argocd-app-deploy
+spec:
+  selector:
+    matchLabels:
+      app: my-argocd-app
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: my-argocd-app
+    spec:
+      containers:
+        - name: my-argocd-app
+          image: vietaws/eks:v1
+          ports:
+            - containerPort: 8080

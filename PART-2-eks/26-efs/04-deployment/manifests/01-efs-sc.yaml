@@ -1,0 +1,11 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-deploy-sc
+provisioner: efs.csi.aws.com
+reclaimPolicy: Delete # Default: Delete | Retain (access point)
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-0f5eecb0ee13c850b
+  directoryPerms: '700'
+# Ref: https://github.com/kubernetes-sigs/aws-efs-csi-driver/tree/master/examples/kubernetes/dynamic_provisioning

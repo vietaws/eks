@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2-deployment
+  labels:
+    app: app2
+spec:
+  replicas: 20
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ip-192-168-68-61.ap-southeast-1.compute.internal
+      containers:
+        - name: simple-app
+          image: vietaws/eks:app2
+          command: ['/bin/sh']
+          args:
+            [
+              '-c',
+              'while true; do echo $(TZ="Asia/Ho_Chi_Minh" date) >>
+              /data/app2.txt; sleep 5; done',
+            ]
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /data
+          ports:
+            - containerPort: 8080
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: ebs2-claim

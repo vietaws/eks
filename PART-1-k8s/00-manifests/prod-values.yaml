@@ -1,0 +1,8 @@
+# Example per-environment values for the podinfo chart.
+replicaCount: 3
+ui:
+  message: "production build"
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi

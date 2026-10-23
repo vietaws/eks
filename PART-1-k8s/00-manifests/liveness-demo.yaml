@@ -1,0 +1,20 @@
+# Liveness probe: the kubelet restarts the container if the probe fails.
+# This container is "healthy" for 15s (file exists), then we can break it.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      args:
+        - /bin/sh
+        - -c
+        - touch /tmp/healthy; sleep 20; rm -f /tmp/healthy; sleep 600
+      livenessProbe:
+        exec:
+          command: ["cat", "/tmp/healthy"]
+        initialDelaySeconds: 3
+        periodSeconds: 5
+        failureThreshold: 1

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          # Pinned to a specific version so the rollout lesson can bump it.
+          image: nginx:1.26-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "25m"
+              memory: "32Mi"

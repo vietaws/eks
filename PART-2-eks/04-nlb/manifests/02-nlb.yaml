@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nlb-demo
+  labels:
+    app: home-app
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb # To create Network Load Balancer | using default aws cloud lb controller (legacy)
+spec:
+  type: LoadBalancer
+  selector:
+    app: home-app
+  ports:
+    - port: 80
+      targetPort: 8080

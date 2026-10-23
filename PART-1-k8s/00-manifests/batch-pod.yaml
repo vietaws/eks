@@ -1,0 +1,17 @@
+# This Pod tolerates the taint dedicated=batch:NoSchedule, so it CAN land on a
+# node tainted that way. Pods without this toleration are repelled.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: batch-pod
+  labels:
+    app: batch-pod
+spec:
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "batch"
+      effect: "NoSchedule"
+  containers:
+    - name: nginx
+      image: nginx:1.27-alpine

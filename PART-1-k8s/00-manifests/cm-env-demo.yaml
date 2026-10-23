@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-env-demo
+spec:
+  restartPolicy: Never
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "echo COLOR=$APP_COLOR MODE=$APP_MODE; sleep 3600"]
+      env:
+        - name: APP_COLOR
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: APP_COLOR
+        - name: APP_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: APP_MODE

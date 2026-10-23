@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  # Simple key/value pairs — good for env vars.
+  APP_COLOR: "blue"
+  APP_MODE: "production"
+  # A file-like key — good for mounting as a config file.
+  app.properties: |
+    color=blue
+    mode=production
+    greeting=Hello from ConfigMap
