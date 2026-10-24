@@ -85,7 +85,7 @@ Pod manifest: https://kubernetes.io/docs/concepts/workloads/pods/
 
 6. "Clean up."
    ```bash
-   kubectl delete -f labs/web-pod.yaml
+   kubectl delete -f 00-manifests/web-pod.yaml
    ```
 
 **Conclusions**:
