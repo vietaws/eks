@@ -19,7 +19,7 @@ spec:
           i=0;
           while true; do
             i=$((i+1));
-            echo "$(date -u +%T) app heartbeat #$i" >> /var/log/app/app.log;
+            echo "$(date -u +%T) app heartbeat #$i" | tee -a /var/log/app/app.log;
             sleep 2;
           done
       volumeMounts:
