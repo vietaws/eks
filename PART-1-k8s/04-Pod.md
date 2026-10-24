@@ -52,8 +52,8 @@ Pod manifest: https://kubernetes.io/docs/concepts/workloads/pods/
 0. "Don't hand-write YAML from scratch — let the CLI scaffold it. Imperative first:"
    ```bash
    kubectl run web --image=nginx:1.27-alpine --port=80 \
-     --dry-run=client -o yaml > web-pod.yaml
-   cat web-pod.yaml
+     --dry-run=client -o yaml > web-pod1.yaml
+   cat web-pod1.yaml
    ```
    Expected: a valid starting Pod manifest, nothing created yet. This is the bridge from imperative to declarative — generate, then refine and commit.
 
@@ -140,7 +140,7 @@ Pod manifest: https://kubernetes.io/docs/concepts/workloads/pods/
    kubectl delete -f 00-manifests/web-with-sidecar.yaml
    ```
 
-**Conclusions**:
+**✅ Conclusions**:
 
 - Containers in a Pod share volumes and localhost.
 - Sidecar = helper container on the app's lifecycle.
