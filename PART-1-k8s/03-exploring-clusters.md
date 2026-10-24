@@ -10,7 +10,7 @@ kubectl get pods -n kube-system
 
 # The four daily-driver verbs
 kubectl get pods -A
-kubectl describe node k8s-course-control-plane | head -n 25
+kubectl describe node vietvn-k8s-control-plane | head -n 25
 # kubectl logs <pod> -n <ns>
 # kubectl exec -it <pod> -- sh
 
