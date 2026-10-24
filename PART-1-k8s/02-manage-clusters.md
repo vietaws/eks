@@ -26,7 +26,7 @@ Expected: `get clusters` lists existing clusters; one node `scratch-control-plan
 cat 01-prep/kind-config.yaml
 
 # Create from config (or use ./cluster-up.sh which also waits for Ready)
-kind create cluster --name k8s-course --config 01-prep/kind-config.yaml
+kind create cluster --name vietvn-k8s --config 01-prep/kind-config.yaml
 
 # Verify
 kubectl get nodes -o wide
