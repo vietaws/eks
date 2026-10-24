@@ -33,6 +33,14 @@ This course is built for people who ship — or want to ship — containers on A
 - Deliver continuously with **GitOps using Argo CD**.
 - Do all of the above with **cost-saving defaults** (Graviton, Spot, scale-to-zero) baked in.
 
+![k8s-architecture](PART-1-k8s/capstone/k8s-architecture.png)
+
+K8S Architecture
+
+![eks-architecture](PART-1-k8s/capstone/eks-architecture.png)
+
+Amazon EKS Architecture
+
 ---
 
 ## 🗺️ Course structure
