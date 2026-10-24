@@ -29,7 +29,7 @@
    kubectl delete -f 00-manifests/web-rs.yaml
    ```
 
-**Conclusions:**
+**✅ Conclusions:**
 
 - ReplicaSet = replicas + selector + template.
 - Delete an owned Pod and it's recreated — self-healing in action.
