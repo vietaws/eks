@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Reset cluster state between lessons/sections WITHOUT deleting the cluster.
 # Deletes user workloads in the 'default' namespace and any 'course-*' namespaces.
-# Usage: ./scripts/reset.sh
+# Usage: ./reset.sh
 set -euo pipefail
 
 echo "Deleting common workloads in 'default' namespace..."

@@ -6,7 +6,7 @@
 # Delete:   kind delete cluster --name k8s-course
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-name: k8s-course
+name: vietvn-k8s
 nodes:
   - role: control-plane
     # Port mappings let ingress-nginx (Section 12) be reachable on localhost.

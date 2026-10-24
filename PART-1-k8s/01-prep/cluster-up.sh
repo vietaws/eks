@@ -3,7 +3,7 @@
 # Usage: ./cluster-up.sh
 set -euo pipefail
 
-CLUSTER_NAME="k8s-course"
+CLUSTER_NAME="vietvn-k8s"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${SCRIPT_DIR}/kind-config.yaml"
 
