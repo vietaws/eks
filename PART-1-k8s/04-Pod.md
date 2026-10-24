@@ -26,6 +26,12 @@ Pod manifest: https://kubernetes.io/docs/concepts/workloads/pods/
    kubectl port-forward pod/web 8080:80
    # in another terminal:
    curl -s localhost:8080 | head -n 5
+
+   # logs
+   kubectl logs web
+
+   # interactive mode
+   kubectl exec -it pods/web -- /bin/sh
    ```
    Expected: the nginx welcome HTML. Ctrl-C to stop the forward.
 
@@ -88,7 +94,7 @@ Pod manifest: https://kubernetes.io/docs/concepts/workloads/pods/
    kubectl delete -f 00-manifests/web-pod.yaml
    ```
 
-**Conclusions**:
+**✅ Conclusions**:
 
 - Four keys: apiVersion, kind, metadata, spec.
 - You write spec; Kubernetes writes status.
