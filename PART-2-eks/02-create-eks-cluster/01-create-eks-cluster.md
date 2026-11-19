@@ -7,6 +7,7 @@
 ```
 # Create Cluster
 eksctl create cluster --name=vietvn \
+                      --version 1.37 \
                       --region=ap-southeast-1 \
                       --zones=ap-southeast-1a,ap-southeast-1b \
                       --without-nodegroup \
@@ -14,6 +15,10 @@ eksctl create cluster --name=vietvn \
 
 # Get List of clusters
 eksctl get cluster --profile eks
+
+# Create Cluster using manifest & eksctl
+eksctl create cluster -f 00-cluster.yaml
+
 ```
 
 #### Enable IAM OIDC for EKS Cluster
