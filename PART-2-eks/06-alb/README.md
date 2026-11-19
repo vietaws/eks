@@ -31,17 +31,17 @@ aws iam create-policy \
 
 # 2. IRSA service account (replace ACCOUNT_ID and cluster name)
 eksctl create iamserviceaccount \
-  --cluster=eksdemo --namespace=kube-system \
+  --cluster=vietvn --namespace=kube-system \
   --name=aws-load-balancer-controller \
   --role-name AmazonEKSLoadBalancerControllerRole \
-  --attach-policy-arn=arn:aws:iam::ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
+  --attach-policy-arn=arn:aws:iam::274595021951:policy/AWSLoadBalancerControllerIAMPolicy \
   --override-existing-serviceaccounts --approve --profile eks
 
 # 3. Install via Helm
 helm repo add eks https://aws.github.io/eks-charts && helm repo update
 helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
   -n kube-system \
-  --set clusterName=eksdemo \
+  --set clusterName=vietvn \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller
 

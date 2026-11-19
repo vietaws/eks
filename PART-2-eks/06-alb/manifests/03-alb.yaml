@@ -5,13 +5,13 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: 08-alb-basics
+  name: 06-alb-basics
   labels:
     app: home-app
   annotations:
     # Ingress Core Settings
     # kubernetes.io/ingress.class: "alb" | deprecated
-    alb.ingress.kubernetes.io/load-balancer-name: 08-alb-basics
+    alb.ingress.kubernetes.io/load-balancer-name: 06-alb-basics
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
     alb.ingress.kubernetes.io/target-type: instance #| instance | ip
