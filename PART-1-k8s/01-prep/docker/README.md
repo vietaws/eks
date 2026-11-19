@@ -70,6 +70,9 @@ docker buildx build --platform linux/amd64,linux/arm64 \
   -t vietaws/demo:latest --push .
 
 docker buildx build --platform linux/amd64,linux/arm64 \
+-t vietaws/eks:v1 -t vietaws/eks:home -t vietaws/eks:app1 -t vietaws/eks:app2 -t vietaws/eks:orders -t vietaws/eks:payments --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
 --build-arg APP_VERSION=5 -t vietaws/eks:v5 --push .
 ```
 

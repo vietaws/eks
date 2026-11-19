@@ -18,8 +18,8 @@ app.use(
 // Empty values (for example `BACKGROUND_COLOR=`) also fall back to the default.
 const BACKGROUND_COLOR = process.env.BACKGROUND_COLOR || "#283E5B";
 const APP_PORT = Number.parseInt(process.env.PORT, 10) || 8080;
-const APP_ENV = process.env.APP_ENV || "local"; // for example: dev, prod
-const APP_VERSION = process.env.APP_VERSION || "0"; // baked into the image with --build-arg
+const APP_ENV = process.env.APP_ENV || "dev"; // for example: dev, prod
+const APP_VERSION = process.env.APP_VERSION || "1"; // baked into the image with --build-arg
 const LOG_LEVELS = ["error", "warn", "info", "debug"];
 const LOG_LEVEL = LOG_LEVELS.includes((process.env.LOG_LEVEL || "").toLowerCase())
   ? process.env.LOG_LEVEL.toLowerCase()
@@ -87,7 +87,7 @@ app.get("/", async (req, res) => {
 
 
 // Simple per-app pages, handy for testing path-based routing (for example an Ingress).
-["app1", "app2"].forEach((name) => {
+["app1", "app2", "orders", "payments"].forEach((name) => {
   app.get(`/${name}`, (req, res) => {
     const html = `
     <html>
