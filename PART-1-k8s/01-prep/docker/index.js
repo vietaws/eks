@@ -86,6 +86,26 @@ app.get("/", async (req, res) => {
 });
 
 
+// Simple per-app pages, handy for testing path-based routing (for example an Ingress).
+["app1", "app2"].forEach((name) => {
+  app.get(`/${name}`, (req, res) => {
+    const html = `
+    <html>
+    <head>
+      <title>${name}</title>
+    </head>
+    <body style='background-color: ${escapeHtml(BACKGROUND_COLOR)}; color: wheat;text-align: center;'>
+      <h1 style='color: orange'>Welcome to ${name}</h1>
+      <h3>Container name: <span style='color: pink'>${escapeHtml(os.hostname())}</span></h3>
+      <h3>Application Version: <span style='color: coral'>V${escapeHtml(APP_VERSION)}</span></h3>
+      <h3>Environment: <span style='color: coral'>${escapeHtml(APP_ENV)}</span></h3>
+    </body>
+    </html>
+    `;
+    res.send(html);
+  });
+});
+
 // Health check for Kubernetes probes
 app.get("/healthz", (req, res) => {
   res.json({ status: "ok" });
