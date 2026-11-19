@@ -17,6 +17,7 @@ spec:
       containers:
         - name: simple-app2
           image: vietaws/eks:app2
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
 ---
