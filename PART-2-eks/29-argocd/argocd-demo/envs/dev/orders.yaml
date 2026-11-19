@@ -1,0 +1,15 @@
+# A new service = one small values file (release name `orders` drives all resource names)
+replicas: 1
+
+image:
+  repository: nginx
+  tag: stable
+
+containerPort: 80
+
+service:
+  port: 80
+
+env:
+  - name: LOG_LEVEL
+    value: debug

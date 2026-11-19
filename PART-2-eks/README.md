@@ -38,7 +38,7 @@ Each demo is self-contained and documented with the **same README structure** so
 | 26 | `26-efs`                      | EFS CSI driver (static + dynamic)       | **Yes** (EFS)               |
 | 27 | `27-instance-store`           | NVMe instance-store PVs (+ RAID-0)      | **Yes** ($$ large EC2)      |
 | 28 | `28-terraform`                | Provision EKS with Terraform            | **Yes** (EKS + EC2 + NAT)   |
-| 29 | `29-argocd`                   | GitOps with Argo CD                     | **Yes** (runs on cluster)   |
+| 29 | `29-argocd`                   | GitOps with Argo CD + Helm              | **Yes** (runs on cluster)   |
 
 ---
 

@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: myapps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+
+  generators:
+    - list:
+        elements:
+          # One element = one Application. Add a line here to add a service/environment.
+          - name: vietaws-argo-application        # keep the existing name so resources are adopted
+            release: myapp
+            namespace: myapp
+            valuesFile: envs/dev/values.yaml
+            autoSync: true
+          - name: vietaws-argo-application-prod
+            release: myapp
+            namespace: myapp-prod
+            valuesFile: envs/prod/values.yaml
+            autoSync: true                        # set to false in 12-promotion-rollback.md
+          - name: orders-dev
+            release: orders
+            namespace: orders
+            valuesFile: envs/dev/orders.yaml
+            autoSync: true
+
+  # If the ApplicationSet (or an element) is deleted, keep the workloads running.
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+
+  template:
+    metadata:
+      name: '{{.name}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/vietaws/argocd-demo.git
+        targetRevision: HEAD
+        path: charts/myapp
+        helm:
+          releaseName: '{{.release}}'
+          valueFiles:
+            - '../../{{.valuesFile}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+
+  # `template` only templates strings, so the sync policy (with a conditional) is a patch.
+  # The patch is never empty, because an empty `spec:` would clear existing fields.
+  templatePatch: |
+    spec:
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+    {{- if .autoSync }}
+        automated:
+          prune: true
+          selfHeal: true
+    {{- end }}

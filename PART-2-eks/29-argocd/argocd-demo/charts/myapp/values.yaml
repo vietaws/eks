@@ -1,0 +1,17 @@
+# Defaults. Each environment overrides what it needs in envs/<env>/values.yaml
+replicas: 2
+
+image:
+  repository: vietaws/eks
+  tag: v1
+
+containerPort: 8080
+
+service:
+  port: 8080
+
+# Extra environment variables for the container, for example:
+# env:
+#   - name: LOG_LEVEL
+#     value: debug
+env: []

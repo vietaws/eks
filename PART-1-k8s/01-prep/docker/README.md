@@ -37,7 +37,23 @@ docker build -t simple-app .
 # Build with a specific tag version
 docker build -t simple-app:1.0.0 .
 
+# Bake the application version into the image (shown on the home page, default: 0)
+docker build --build-arg APP_VERSION=2 -t simple-app:v2 .
 ```
+
+### Configuration
+
+Every variable is optional. An unset or empty variable uses its default.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `8080` | Listening port |
+| `BACKGROUND_COLOR` | `#283E5B` | Home page background |
+| `APP_ENV` | `local` | Environment name shown on the home page (for example `dev`, `prod`) |
+| `APP_VERSION` | `0` | Version shown on the home page. Set at build time with `--build-arg`, and `-e APP_VERSION=...` overrides it at run time |
+| `LOG_LEVEL` | `info` | `error`, `warn`, `info`, or `debug`. Any other value falls back to `info` |
+
+Other endpoints: `/healthz` (returns `{"status":"ok"}`), `/users`, `/products`.
 
 ### Push to Docker Hub and ECR
 
@@ -52,6 +68,9 @@ docker login -u vietaws
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t vietaws/demo:v1 \
   -t vietaws/demo:latest --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+--build-arg APP_VERSION=1 -t vietaws/eks:v1 --push .
 ```
 
 **Amazon ECR (private)**
@@ -68,6 +87,11 @@ aws ecr get-login-password --region ap-southeast-1 | \
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 \
   -t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:latest --push .
+
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+-t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v2 \
+--build-arg APP_VERSION=2 --push .
 ```
 
 **Push to both registries in one build**
