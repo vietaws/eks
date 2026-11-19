@@ -1,8 +1,6 @@
 # 🌈 Benefits
 
-- CI: Code management in a Repository, Commit Code, Testing Code, Build code
-  into container image, and store container image in a registry such as: AWS
-  CodeCommit, GitHub, GitLab
+- CI: Code management in a Repository, Commit Code, Testing Code, Build code into container image, and store container image in a registry such as: AWS CodeCommit, GitHub, GitLab
 - CD: Deploy the containers to real k8s env as Pod, Deployment, Service
 
 # 1️⃣ Without ArgoCD
@@ -36,8 +34,7 @@
 - We will have 2 repositories
   - Application repo: store source code of application itself
   - Manifest repo: store k8s manifest such as: service, deployment
-- ArgoCD use `polling` mechanism to check changes on Manifest repo (3 minutes
-  interval) or configure webhook to push new changes on repo to ArgoCD
+- ArgoCD use `polling` mechanism to check changes on Manifest repo (3 minutes interval) or configure webhook to push new changes on repo to ArgoCD
 - You have to install argoCD in your k8s cluster
 
 **Benefits**:

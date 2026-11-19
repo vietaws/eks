@@ -3,12 +3,13 @@ kind: Application
 metadata:
   name: vietaws-argo-application
   namespace: argocd
+  # https://github.com/argoproj/argo-cd/tree/master/manifests
 spec:
   project: default
   source:
     repoURL: https://github.com/vietaws/argocd-demo.git
     targetRevision: HEAD
-    path: dev
+    path: app
   destination:
     server: https://kubernetes.default.svc
     namespace: myapp

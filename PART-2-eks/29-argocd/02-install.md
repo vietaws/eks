@@ -3,8 +3,7 @@
 > 📗 Guide: https://argo-cd.readthedocs.io/en/stable/getting_started/
 
 ## 🎯 Scenario
-Install Argo CD into the cluster and log in to the UI to drive GitOps-style
-deployments.
+Install Argo CD into the cluster and log in to the UI to drive GitOps-style deployments.
 
 ## 1️⃣ Install Argo CD
 ```bash
@@ -43,9 +42,6 @@ kubectl delete namespace argocd
 ```
 
 ## 📝 Notes & security
-- 🔐 The `argocd-initial-admin-secret` is a **real credential**. Never commit its
-  plaintext or base64 value. Rotate it and delete the bootstrap secret after
-  first login.
+- 🔐 The `argocd-initial-admin-secret` is a **real credential**. Never commit its plaintext or base64 value. Rotate it and delete the bootstrap secret after first login.
 - For production, disable the local `admin` user and wire up SSO (OIDC/Dex).
-- Prefer exposing the UI via an Ingress/LoadBalancer with TLS rather than
-  long-lived port-forwards.
+- Prefer exposing the UI via an Ingress/LoadBalancer with TLS rather than long-lived port-forwards.
