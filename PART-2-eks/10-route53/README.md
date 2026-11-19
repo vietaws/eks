@@ -23,7 +23,7 @@ Ingress/Service (hostname annotation)
 # 2. IRSA service account (replace cluster + policy ARN placeholders)
 eksctl create iamserviceaccount \
   --name external-dns --namespace default \
-  --cluster eksdemo \
+  --cluster vietvn \
   --attach-policy-arn arn:aws:iam::ACCOUNT_ID:policy/AllowExternalDNSUpdates \
   --approve --override-existing-serviceaccounts --profile eks
 
