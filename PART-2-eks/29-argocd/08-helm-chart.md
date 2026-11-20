@@ -14,7 +14,8 @@ charts/myapp/
 ├── values.yaml           # default values
 └── templates/
     ├── deployment.yaml   # same as app/deployment.yaml, with {{ .Values.* }}
-    └── service.yaml
+    ├── service.yaml
+    └── ingress.yaml      # optional ALB, rendered only when ingress.enabled is true
 ```
 
 Template excerpt:
@@ -43,6 +44,14 @@ Compare with the original:
 ```
 diff <(helm template myapp charts/myapp) <(cat app/deployment.yaml app/service.yaml)
 # Only whitespace, ordering, and the quotes around the image differ
+```
+
+Each environment gets its own ALB. Check that the Ingress renders for dev and prod but not for `orders`:
+
+```
+helm template myapp charts/myapp -f envs/dev/values.yaml  | grep -A4 "kind: Ingress"   # vietvn-argocd-dev-alb
+helm template myapp charts/myapp -f envs/prod/values.yaml | grep -A4 "kind: Ingress"   # vietvn-argocd-prod-alb
+helm template orders charts/myapp -f envs/dev/orders.yaml | grep -c "kind: Ingress"    # 0
 ```
 
 💡 Nothing is deployed in this step. Argo CD still points at `app/`.

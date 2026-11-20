@@ -29,6 +29,8 @@ env:
 
 The chart uses `{{ .Release.Name }}` for names, so this creates `orders` and `orders-service` and does not collide with `myapp`.
 
+💡 To give a service its own ALB, add `ingress.enabled: true` and a unique `ingress.loadBalancerName` (max 32 characters) to its values file. `orders` has none, so no ALB is created.
+
 # 3️⃣ Test locally, then deploy
 
 ```

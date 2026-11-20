@@ -8,8 +8,8 @@ Repo stage: tag `v4-helm-envs` in https://github.com/vietaws/argocd-demo.git
 argocd-demo/
 ├── charts/myapp/          # one chart
 └── envs/
-    ├── dev/values.yaml    # replicas: 1, LOG_LEVEL=debug
-    └── prod/values.yaml   # replicas: 3, LOG_LEVEL=info
+    ├── dev/values.yaml    # replicas: 1, LOG_LEVEL=debug, ALB vietvn-argocd-dev-alb
+    └── prod/values.yaml   # replicas: 3, LOG_LEVEL=info, ALB vietvn-argocd-prod-alb
 ```
 
 `app/` and `app-prod/` stay in the repo as the plain-manifest baseline, but nothing syncs them after this step.
@@ -25,6 +25,9 @@ The new files use the same Application names, so `kubectl apply` updates the exi
 git push origin main --tags
 
 # in this folder
+# once per cluster: the IngressClass the chart's Ingress uses (needs the AWS Load Balancer Controller)
+kubectl apply -f argocd-demo/alb/ingress-class.yaml
+
 kubectl apply -f helm/application-dev.yaml
 kubectl apply -f helm/application-prod.yaml
 ```
@@ -48,9 +51,15 @@ source:
 kubectl get deploy -n myapp
 kubectl get deploy -n myapp-prod
 kubectl -n myapp get deploy myapp -o jsonpath='{.spec.template.spec.containers[0].env}'
+kubectl get ingress -n myapp
+kubectl get ingress -n myapp-prod
 ```
 
 ✅ Dev has 1 replica and prod has 3, with no downtime during the switch because names and selectors did not change.
+
+✅ Each environment has its own ALB. The ADDRESS column fills in after 2-3 minutes, and the ALBs `vietvn-argocd-dev-alb` and `vietvn-argocd-prod-alb` appear in the EC2 console (Load Balancers).
+
+⚠ If an Ingress has no ADDRESS, run `kubectl describe ingress -n myapp` and check the `aws-load-balancer-controller` logs in `kube-system`.
 
 # 4️⃣ Where do the values live?
 

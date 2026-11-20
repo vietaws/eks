@@ -21,8 +21,15 @@ The two folders are identical except `replicas: 3`.
 git push origin main --tags
 
 # in this folder
+kubectl apply -f application.yaml
+
 kubectl apply -f application-prod.yaml
 # Output: application.argoproj.io/vietaws-argo-application-prod created
+
+# Delete 
+kubectl delete -f application.yaml
+
+kubectl delete -f application-prod.yaml
 ```
 
 # 3️⃣ Verify
