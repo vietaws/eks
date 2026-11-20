@@ -18,10 +18,10 @@ argocd-demo/
 │   └── templates/
 └── envs/                    # stage 4+: values per environment or service
     ├── dev/
-    │   ├── values.yaml          # myapp dev: 1 replica, LOG_LEVEL=debug
+    │   ├── values.yaml          # myapp dev: 1 replica, APP_ENV=dev, blue background, LOG_LEVEL=debug
     │   └── orders.yaml          # stage 5: new service, values only
     └── prod/
-        └── values.yaml          # myapp prod: 3 replicas, LOG_LEVEL=info
+        └── values.yaml          # myapp prod: 3 replicas, APP_ENV=prod, green background, LOG_LEVEL=info
 ```
 
 | Tag | Stage | Argo CD Application path |
@@ -31,6 +31,7 @@ argocd-demo/
 | `v3-helm-chart` | Helm chart, not deployed yet | none (test with `helm template`) |
 | `v4-helm-envs` | One chart, values per environment | `charts/myapp` + `envs/<env>/values.yaml` |
 | `v5-new-service` | New `orders` service from a values file | `charts/myapp` + `envs/dev/orders.yaml` |
+| `v8-env-values` | Per-env app settings (`appEnv`, `backgroundColor`, `logLevel`, `appVersion`) and `/healthz` probes | `charts/myapp` + `envs/<env>/values.yaml` |
 
 `app/` and `app-prod/` stay on `main` as the plain-manifest baseline. After stage 4 nothing syncs them.
 
@@ -62,3 +63,15 @@ Helm stage:
 2. Change `replicas` in `envs/prod/values.yaml`. Only prod changes.
 3. Change a template in `charts/myapp/templates/`. Every environment and service changes.
 4. Copy `envs/dev/orders.yaml` to add another service.
+5. Change `backgroundColor` in `envs/prod/values.yaml` and push. After the sync the prod page changes color (dev is blue, prod is green).
+
+Chart values for the `vietaws/eks` image (empty means the variable is not set):
+
+| Value | Env var | Notes |
+|---|---|---|
+| `appEnv` | `APP_ENV` | Shown on the page, for example `dev` or `prod` |
+| `backgroundColor` | `BACKGROUND_COLOR` | Page background |
+| `logLevel` | `LOG_LEVEL` | `error`, `warn`, `info`, `debug` |
+| `appVersion` | `APP_VERSION` | `auto` uses `image.tag` without the leading `v` |
+| `probes.enabled` | none | Readiness and liveness probes on `/healthz` |
+| `env` | any | Extra raw variables, used by non-app images such as `orders` (nginx) |

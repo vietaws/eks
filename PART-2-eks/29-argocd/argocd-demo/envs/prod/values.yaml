@@ -3,6 +3,10 @@ replicas: 3
 image:
   tag: v1
 
-env:
-  - name: LOG_LEVEL
-    value: info
+appEnv: prod
+backgroundColor: "#1B5E20"   # green
+logLevel: info
+appVersion: auto
+
+probes:
+  enabled: true

@@ -17,7 +17,43 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
             - containerPort: {{ .Values.containerPort }}
-          {{- with .Values.env }}
+          {{- if or .Values.appEnv .Values.backgroundColor .Values.logLevel .Values.appVersion .Values.env }}
           env:
+            {{- with .Values.appEnv }}
+            - name: APP_ENV
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.backgroundColor }}
+            - name: BACKGROUND_COLOR
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.logLevel }}
+            - name: LOG_LEVEL
+              value: {{ . | quote }}
+            {{- end }}
+            {{- if .Values.appVersion }}
+            - name: APP_VERSION
+              {{- if eq (toString .Values.appVersion) "auto" }}
+              value: {{ .Values.image.tag | toString | trimPrefix "v" | quote }}
+              {{- else }}
+              value: {{ .Values.appVersion | toString | quote }}
+              {{- end }}
+            {{- end }}
+            {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.probes.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.path }}
+              port: {{ .Values.containerPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
           {{- end }}

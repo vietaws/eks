@@ -63,7 +63,7 @@ eksctl create cluster --name=vietvn \
 # Create Public Node Group
 eksctl create nodegroup --cluster=vietvn \
                        --region=ap-southeast-1 \
-                       --name=vietvn-ng \
+                       --name=vietvn-ng2 \
                        --node-type=t3.medium \
                        --nodes=2 \
                        --nodes-min=2 \
@@ -128,7 +128,7 @@ eksctl get clusters --profile eks
 
 eksctl get nodegroup --cluster=<clusterName>
 
-eksctl get nodegroup --cluster=vietvn-ng
+eksctl get nodegroup --cluster=vietvn
 
 ### Delete Node Group
 

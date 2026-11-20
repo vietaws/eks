@@ -10,8 +10,19 @@ containerPort: 8080
 service:
   port: 8080
 
+# Settings read by the vietaws/eks image. Empty = variable not set (image default applies).
+appEnv: ""            # APP_ENV, for example dev or prod
+backgroundColor: ""   # BACKGROUND_COLOR, for example "#283E5B"
+logLevel: ""          # LOG_LEVEL: error, warn, info, debug
+appVersion: ""        # APP_VERSION; "auto" = image.tag without the leading "v"
+
+# HTTP readiness and liveness probes (the vietaws/eks image serves /healthz)
+probes:
+  enabled: false
+  path: /healthz
+
 # Extra environment variables for the container, for example:
 # env:
-#   - name: LOG_LEVEL
-#     value: debug
+#   - name: FOO
+#     value: bar
 env: []
