@@ -30,6 +30,14 @@ kubectl apply -f application-prod.yaml
 kubectl delete -f application.yaml
 
 kubectl delete -f application-prod.yaml
+
+# delete argocd app
+kubectl delete ns argocd
+
+# delete app namespaces
+kubectl delete ns myapp myapp-prod orders
+
+
 ```
 
 # 3️⃣ Verify

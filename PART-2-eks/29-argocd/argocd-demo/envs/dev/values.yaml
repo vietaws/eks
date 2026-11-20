@@ -4,7 +4,7 @@ image:
   tag: v1
 
 appEnv: dev
-backgroundColor: "#283E5B"   # blue #283E5B | pink #da42f5
+backgroundColor: "#da42f5"   # blue #283E5B | pink #da42f5
 logLevel: debug
 appVersion: auto
 
