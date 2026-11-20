@@ -26,3 +26,11 @@ probes:
 #   - name: FOO
 #     value: bar
 env: []
+
+# AWS Load Balancer Controller Ingress. One ALB per release: set a unique loadBalancerName per environment.
+ingress:
+  enabled: false
+  className: aws-ingress-class   # see alb/ingress-class.yaml
+  loadBalancerName: ""           # max 32 characters, unique per environment
+  scheme: internet-facing
+  healthcheckPath: /healthz

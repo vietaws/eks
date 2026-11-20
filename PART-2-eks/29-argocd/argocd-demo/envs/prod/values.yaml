@@ -10,3 +10,7 @@ appVersion: auto
 
 probes:
   enabled: true
+
+ingress:
+  enabled: true
+  loadBalancerName: vietvn-argocd-prod-alb
