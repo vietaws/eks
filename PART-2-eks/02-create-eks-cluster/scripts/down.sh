@@ -89,9 +89,21 @@ if eksctl get cluster --name "$CLUSTER_NAME" --region "$AWS_REGION" >/dev/null 2
       --query 'LaunchTemplates[].LaunchTemplateName' --output text); do
     aws ec2 delete-launch-template --region "$AWS_REGION" --launch-template-name "$lt" >/dev/null
   done
+  # The Pod Identity role (created by install-karpenter.sh) has the Karpenter stack's controller policies attached.
+  # IAM refuses to delete a policy that is still attached (409), so remove the association and its role first.
+  if [ "$(eksctl get podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
+      --namespace kube-system --service-account-name karpenter -o json 2>/dev/null | jq 'length')" -gt 0 ] 2>/dev/null; then
+    eksctl delete podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
+      --namespace kube-system --service-account-name karpenter || true
+  fi
   if aws cloudformation describe-stacks --region "$AWS_REGION" --stack-name "Karpenter-${CLUSTER_NAME}" >/dev/null 2>&1; then
     aws cloudformation delete-stack --region "$AWS_REGION" --stack-name "Karpenter-${CLUSTER_NAME}"
-    aws cloudformation wait stack-delete-complete --region "$AWS_REGION" --stack-name "Karpenter-${CLUSTER_NAME}"
+    if ! aws cloudformation wait stack-delete-complete --region "$AWS_REGION" --stack-name "Karpenter-${CLUSTER_NAME}"; then
+      echo "WARNING: stack Karpenter-${CLUSTER_NAME} did not delete. Reason:" >&2
+      aws cloudformation describe-stack-events --region "$AWS_REGION" --stack-name "Karpenter-${CLUSTER_NAME}" \
+        --query "StackEvents[?ResourceStatus=='DELETE_FAILED'].[LogicalResourceId,ResourceStatusReason]" --output text >&2 || true
+      echo "Continuing with the cluster delete. Rerun this script afterwards to retry the stack." >&2
+    fi
   fi
 else
   echo "Cluster $CLUSTER_NAME not found, skipping Kubernetes cleanup."
