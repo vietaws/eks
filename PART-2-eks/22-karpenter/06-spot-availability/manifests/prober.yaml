@@ -1,0 +1,46 @@
+# In-cluster availability probe. Calls the web Service about 5 times a second and counts successes and failures.
+# It runs on the managed node group (never on a Karpenter node) so Karpenter disruption cannot interrupt the probe itself.
+# Read the result with:  kubectl logs deploy/prober --tail=3     and     kubectl logs deploy/prober | grep -c FAIL
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prober
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prober
+  template:
+    metadata:
+      labels:
+        app: prober
+    spec:
+      terminationGracePeriodSeconds: 0
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: karpenter.sh/nodepool
+                    operator: DoesNotExist
+      containers:
+        - name: prober
+          image: public.ecr.aws/docker/library/busybox:stable # multi-arch
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              ok=0; fail=0; i=0
+              while true; do
+                if wget -q -T 1 -O /dev/null http://web.default.svc.cluster.local/; then
+                  ok=$((ok + 1))
+                else
+                  fail=$((fail + 1)); echo "$(date -u +%H:%M:%S) FAIL"
+                fi
+                i=$((i + 1))
+                [ $((i % 25)) -eq 0 ] && echo "$(date -u +%H:%M:%S) ok=$ok fail=$fail"
+                sleep 0.2
+              done

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install Karpenter on the shared MODE=standard cluster from 02-create-eks-cluster (about 5 minutes).
+# Install Karpenter on the shared standard-mode cluster from 02-create-eks-cluster (about 5 minutes).
 # Mirrors https://karpenter.sh/docs/getting-started/getting-started-with-karpenter/ for the managed node group path:
 #   CloudFormation (node role, controller policies, SQS interruption queue) -> Spot service-linked role
 #   -> Pod Identity association -> node role access -> Helm chart.

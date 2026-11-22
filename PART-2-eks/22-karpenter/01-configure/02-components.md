@@ -8,8 +8,7 @@
 
 # NodeClass
 
-- Enabled configuration for AWS related such as: subnet, ami, security group of
-  node
+- Enabled configuration for AWS related such as: subnet, ami, security group of node
 
 - One `NodeClass` can be referred by many `NodePool`
 

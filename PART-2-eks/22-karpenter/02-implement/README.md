@@ -13,7 +13,7 @@ Pending pods → Karpenter → EC2 API → launch node (shape from NodePool, AWS
 ```
 
 ## ✅ Prerequisites
-- Cluster from `02-create-eks-cluster` (`MODE=standard`) and Karpenter installed (`01-configure/04-install.md`).
+- Cluster from `02-create-eks-cluster` (`--mode=standard`) and Karpenter installed (`01-configure/04-install.md`).
 - `envsubst` (`brew install gettext`) and `kubectl`.
 
 ## 🚀 Steps
@@ -48,6 +48,13 @@ kubectl delete deployment inflate
 kubectl delete nodepool default       # Karpenter drains and terminates its nodes
 kubectl delete ec2nodeclass default
 ```
+
+## ✅ Conclusion
+- Pending pods are enough to make Karpenter create nodes: no node group to resize and no Auto Scaling Group.
+- The NodePool states what is allowed (arch, Spot or On-Demand, instance category, limits). The EC2NodeClass states how
+  it is built on AWS (AMI, subnets, security groups, role). Karpenter picks the cheapest shape that fits.
+- Deleting the pods lets Karpenter remove the nodes again. To scale back, follow `../03-consolidation`.
+- To prove cost and uptime with a real app, continue with `../06-spot-availability`.
 
 ## 📝 Notes & cost
 - **What changed from v1beta1:** `nodeClassRef` is `group`/`kind`/`name`; `expireAfter` moved under

@@ -58,6 +58,14 @@ kubectl delete deployment inflate
 ```
 Keep the NodePool for the next demos, or run the cleanup in `../02-implement/README.md`.
 
+## ✅ Conclusion
+- Scale-up is fast, and scale-down is automatic: empty nodes are deleted and under-used nodes are repacked or replaced
+  by cheaper ones, after `consolidateAfter`.
+- `WhenEmptyOrUnderutilized` saves the most but moves pods. `Balanced` moves them only when the saving is worth it,
+  `WhenEmpty` never moves running pods.
+- Consolidation is **voluntary** disruption. `inflate` is a `pause` pod, so this demo does not show whether a real
+  service stays up. Run the same scale-down with `../06-spot-availability` to check downtime (replicas + PDB + probe).
+
 ## 📝 Notes & cost
 - `consolidationPolicy` in v1: `WhenEmpty`, `WhenEmptyOrUnderutilized` or `Balanced` (`WhenUnderutilized` was
   renamed). See the [disruption docs](https://karpenter.sh/docs/concepts/disruption/).

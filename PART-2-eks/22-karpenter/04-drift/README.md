@@ -99,6 +99,14 @@ to avoid downtime.
 kubectl delete deployment inflate
 ```
 
+## ✅ Conclusion
+- Drift replaces nodes whose spec no longer matches the NodePool or EC2NodeClass, including AMI changes: this is
+  how Karpenter patches the data plane.
+- The order is safe: replacement first, then taint and drain, one budget-limited slice at a time.
+- Whether the app stays up depends on it having 2 or more replicas, a PDB and a readiness probe. To measure that,
+  use the in-cluster prober in `../06-spot-availability` (step 3 uses a NodePool label change to trigger drift).
+- Control **when** it happens with a pinned AMI alias and `disruption.budgets`.
+
 ## 📝 Notes
 - Drift is **voluntary** disruption, so it respects PDBs and `karpenter.sh/do-not-disrupt`.
 - Changing `expireAfter` on the NodePool drifts existing nodes too (their NodeClaims keep the old value).

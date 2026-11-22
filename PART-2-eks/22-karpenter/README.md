@@ -8,6 +8,8 @@ EC2 API directly, picks the cheapest instance that fits the pending pods, and co
 > family and **EKS Pod Identity**. 1.15.x supports Kubernetes 1.36 and 1.37 (see the
 > [compatibility matrix](https://karpenter.sh/docs/upgrading/compatibility/)).
 
+Latest Karpenter Release: https://github.com/aws/karpenter-provider-aws/releases
+
 ## 🗺️ Sub-demos
 | Step | Folder | Teaches |
 |------|--------|---------|
@@ -16,10 +18,29 @@ EC2 API directly, picks the cheapest instance that fits the pending pods, and co
 | 3 | `03-consolidation` | Bin-pack and remove under-used nodes to cut cost |
 | 4 | `04-drift` | Replace nodes when the NodePool, EC2NodeClass or AMI changes |
 | 5 | `05-expired` | Node expiry (`expireAfter`) for freshness |
+| 6 | `06-spot-availability` | Spot cost report, zero-downtime proof with a probe, simulated Spot interruption |
+
+## 🔁 Demo flow
+```
+01-configure ──► 02-implement ──► 03-consolidation ──► 04-drift ──► 05-expired ──► 06-spot-availability
+ install         scale UP          scale DOWN           REPLACE     REPLACE        PROVE cost and uptime
+ Karpenter       (pending pods     (repack, delete      (spec/AMI   (max node      (Spot price, PDB, probe,
+                  → new nodes)      cheaper)             changed)    age)           interruption)
+```
+Focus: **scaling and replacing nodes**. The EKS control plane upgrade is a separate demo (`../33-cluster-upgrade`).
+
+| Phase | What you do | What you should see | Conclusion |
+|-------|-------------|---------------------|------------|
+| 01 | `up.sh --mode=standard`, `install-karpenter.sh` | Karpenter pods Running, CRDs present | Karpenter is a Deployment plus AWS roles, queue and rules. You own its upgrades |
+| 02 | Apply EC2NodeClass + NodePool, scale `inflate` to 5 | NodeClaims and Spot nodes appear in about a minute | Pending pods alone trigger right-sized nodes, no node group |
+| 03 | Scale `inflate` 8 → 2 | Node count drops, pods repacked | Scale-down is automatic, policy decides how aggressive |
+| 04 | Change the NodePool or AMI alias | Old nodes tainted, replacements first | Drift patches nodes safely, PDBs and budgets set the pace |
+| 05 | Set `expireAfter` to 15m | Nodes recycled on schedule | Max node age is a hygiene safety net |
+| 06 | Deploy `web` + prober, run cost report, trigger drift, interrupt a Spot node | Large saving, `FAIL` count 0 when protected, failures when not | Cost comes from Spot + flexibility, uptime comes from the workload settings |
 
 ## ✅ Prerequisites
 - `eksctl` ≥ 0.230.0, `kubectl`, `helm`, `aws` CLI, `envsubst` (`brew install gettext`); optional `eks-node-viewer`.
-- The shared cluster from `02-create-eks-cluster` (`MODE=standard`): OIDC, Pod Identity agent, a public node
+- The shared cluster from `02-create-eks-cluster` (`--mode=standard`): OIDC, Pod Identity agent, a public node
   group and `karpenter.sh/discovery` tags are already set up there.
 
 ## 🚀 Steps
@@ -28,7 +49,7 @@ export AWS_REGION=ap-southeast-1 CLUSTER_NAME=eksdemo
 (cd ../02-create-eks-cluster && ./scripts/up.sh --mode=standard)    # cluster, about 15-20 min
 ./scripts/install-karpenter.sh                                    # Karpenter 1.15.3
 ```
-Then follow `02-implement` → `03-consolidation` → `04-drift` → `05-expired`. Upgrading a cluster that runs Karpenter is
+Then follow `02-implement` → `03-consolidation` → `04-drift` → `05-expired` → `06-spot-availability`. Upgrading a cluster that runs Karpenter is
 covered once, for all compute types, in `../33-cluster-upgrade`.
 
 ## 🔍 Validation

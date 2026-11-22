@@ -87,6 +87,12 @@ minor supports a fixed range of Kubernetes versions. Before you upgrade the clus
 needed, and re-run `helm upgrade --install` with the new `KARPENTER_VERSION`. Regular releases are supported
 only until the next minor is published. For fewer upgrades pick an LTS release (see the same page).
 
+## ✅ Conclusion
+- Karpenter is a normal Deployment plus AWS plumbing: a node role, six controller policies, an SQS interruption queue,
+  EventBridge rules and one Pod Identity association. Nothing here changes the cluster version.
+- It runs on the managed node group, so it never has to provision the node it runs on.
+- You own its upgrades. Check the compatibility matrix before you upgrade the cluster.
+
 ## 🧹 Cleanup
 ```bash
 # Removes NodePools + their nodes, the Helm release, launch templates, the CloudFormation stack and the cluster

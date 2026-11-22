@@ -71,6 +71,12 @@ kubectl patch nodepool default --type merge \
   -p '{"spec":{"template":{"spec":{"expireAfter":"720h"}}}}'    # restore the default
 ```
 
+## ✅ Conclusion
+- `expireAfter` caps node lifetime, so every node is eventually replaced by a fresh one on the current AMI.
+- It is a safety net behind drift, not a replacement for it. `terminationGracePeriod` stops a blocking PDB from keeping
+  an expired node forever, at the price of force-deleting pods after that time.
+- Expiry disrupts like drift, so the same workload protections apply (see `../06-spot-availability`).
+
 ## 📝 Notes
 - Expiry plus `al2023@latest` is the simplest rolling patch process. For production, pin the AMI alias,
   promote it through environments, and keep `expireAfter` as the safety net.
