@@ -1,0 +1,14 @@
+# AWS Load Balancer Controller on a NON-routable overlay.
+# The EKS control plane cannot reach pod IPs, so the controller (and its webhooks) must be hostNetwork.
+clusterName: vietvn-overlay
+region: ap-southeast-1
+vpcId: VPC_ID # terraform output -raw vpc_id
+
+replicaCount: 1 # hostNetwork: one replica per node port set (9443 webhook, 8080 metrics, 61779 health)
+hostNetwork: true
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller # bound to the IAM role by EKS Pod Identity (Terraform)
+
+enableServiceMutatorWebhook: false

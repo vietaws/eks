@@ -39,6 +39,7 @@ Each demo is self-contained and documented with the **same README structure** so
 | 27 | `27-instance-store`           | NVMe instance-store PVs (+ RAID-0)      | **Yes** ($$ large EC2)      |
 | 28 | `28-terraform`                | Provision EKS with Terraform            | **Yes** (EKS + EC2 + NAT)   |
 | 29 | `29-argocd`                   | GitOps with Argo CD + Helm              | **Yes** (runs on cluster)   |
+| 30 | `30-no-vpc-ip-pods`           | Pods without VPC subnet IPs (Cilium overlay, secondary CIDR) | **Yes** (EKS + EC2 + ALB) |
 
 ---
 

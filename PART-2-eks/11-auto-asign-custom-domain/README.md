@@ -5,7 +5,7 @@ Let **ExternalDNS** automatically create a Route 53 record for the ALB, so your 
 
 ## 🗺️ Architecture
 ```
-Ingress (external-dns.alpha.kubernetes.io/hostname: demo.<your-domain>)
+Ingress (external-dns.kubernetes.io/hostname: demo.<your-domain>)
   → AWS LBC provisions ALB
   → ExternalDNS watches the Ingress → writes Route 53 A/ALIAS record
 ```
@@ -19,7 +19,7 @@ Ingress (external-dns.alpha.kubernetes.io/hostname: demo.<your-domain>)
 ## 🚀 Steps
 1. Edit `manifests/05-alb.yaml`:
    - set your ACM cert ARN (`ACCOUNT_ID`/`CERT_ID` placeholders),
-   - set `external-dns.alpha.kubernetes.io/hostname` to **your** domain.
+   - set `external-dns.kubernetes.io/hostname` to **your** domain.
 2. Apply:
    ```bash
    kubectl apply -R -f ./manifests

@@ -2,10 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: 10-alb-https
+  name: 08-alb-https
   annotations:
     # Load Balancer Name
-    alb.ingress.kubernetes.io/load-balancer-name: 10-alb-https
+    alb.ingress.kubernetes.io/load-balancer-name: 08-alb-https
     # Ingress Core Settings
     #kubernetes.io/ingress.class: "alb" (OLD INGRESS CLASS NOTATION - STILL WORKS BUT RECOMMENDED TO USE IngressClass Resource)
     alb.ingress.kubernetes.io/scheme: internet-facing
@@ -22,7 +22,7 @@ metadata:
     # certification
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
     # TODO: Replace with YOUR ACM certificate ARN. Do not commit a real ARN/account ID.
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:ACCOUNT_ID:certificate/CERT_ID
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:274595021951:certificate/ac63d850-fb8b-4706-b193-c1585e98eb15
 
     # SSL Redirect Setting
     alb.ingress.kubernetes.io/ssl-redirect: '443'

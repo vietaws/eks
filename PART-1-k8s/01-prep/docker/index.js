@@ -89,16 +89,23 @@ app.get("/", async (req, res) => {
 // Simple per-app pages, handy for testing path-based routing (for example an Ingress).
 ["app1", "app2", "orders", "payments"].forEach((name) => {
   app.get(`/${name}`, (req, res) => {
+    const containerIp = req.socket.localAddress;
+    const containerName = os.hostname();
+    log("debug", "os hostname:", containerName);
+    const ip = containerIp.split(":")[3];
+    const version = escapeHtml(APP_VERSION);
+    const bgColor = escapeHtml(BACKGROUND_COLOR);
+    const appEnv = escapeHtml(APP_ENV);
     const html = `
     <html>
     <head>
       <title>${name}</title>
     </head>
-    <body style='background-color: ${escapeHtml(BACKGROUND_COLOR)}; color: wheat;text-align: center;'>
+    <body style='background-color: ${bgColor}; color: wheat;text-align: center;'>
       <h1 style='color: orange'>Welcome to ${name}</h1>
-      <h3>Container name: <span style='color: pink'>${escapeHtml(os.hostname())}</span></h3>
-      <h3>Application Version: <span style='color: coral'>V${escapeHtml(APP_VERSION)}</span></h3>
-      <h3>Environment: <span style='color: coral'>${escapeHtml(APP_ENV)}</span></h3>
+      <h3>Container name: <span style='color: pink'>${containerName}</span></h3>
+      <h3>Container's IP Address: <span style='color: pink'>${ip}</span></h3>   
+      <h3>Environment: <span style='color: coral'>${appEnv}</span></h3>
     </body>
     </html>
     `;

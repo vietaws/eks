@@ -134,7 +134,7 @@ eksctl get nodegroup --cluster=vietvn
 
 eksctl delete nodegroup --cluster=<clusterName> --name=<nodegroupName>
 
-eksctl delete nodegroup --cluster=vietvn --name=vietvn-ng --profile eks
+eksctl delete nodegroup --cluster=vietvn --name=vietvn-ng2 --profile eks
 
 ### Delete Cluster
 

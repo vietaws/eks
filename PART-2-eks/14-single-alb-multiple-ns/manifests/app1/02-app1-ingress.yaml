@@ -27,7 +27,7 @@ metadata:
     # SSL Redirect Setting
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     # External DNS - For creating a Record Set in Route53
-    external-dns.alpha.kubernetes.io/hostname: ingress-groups.eks.viet.vn
+    external-dns.kubernetes.io/hostname: ingress-groups.eks.viet.vn
     # Ingress Groups
     alb.ingress.kubernetes.io/group.name: myapps.web
     alb.ingress.kubernetes.io/group.order: '10'

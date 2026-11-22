@@ -15,7 +15,7 @@ metrics-server → HPA controller → adjusts Deployment replicas (1..10)
 
 ## 🚀 Steps
 ```bash
-# 1. Install metrics-server (use the latest release tag)
+# 1. Install metrics-server (use the latest release tag) - OPTIONAL if missing metrics-server on EKS
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 kubectl -n kube-system get deploy metrics-server
 
@@ -42,6 +42,7 @@ kubectl get pods -w
 kubectl delete hpa hpa-demo-deployment
 kubectl delete -f 01-hpa-demo.yaml
 ```
+
 
 ## 📝 Notes & cost
 - Default scale-down stabilization is ~5 min, so pods shrink gradually.

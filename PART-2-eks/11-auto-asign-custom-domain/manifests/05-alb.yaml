@@ -22,13 +22,13 @@ metadata:
     # certification
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
     # TODO-1: Replace with your ACM certificate ARN
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:ACCOUNTID:certificate/CERTIFICATEID
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:274595021951:certificate/ac63d850-fb8b-4706-b193-c1585e98eb15
 
     # SSL Redirect Setting
     alb.ingress.kubernetes.io/ssl-redirect: "443"
 
     # TODO-2: Replace with your External DNS hostname
-    external-dns.alpha.kubernetes.io/hostname: demo.eks.viet.vn
+    external-dns.kubernetes.io/hostname: eks2.demo.vietaws.com
 spec:
   ingressClassName: aws-ingress-class # Ingress Class
   rules:

@@ -8,7 +8,7 @@ metadata:
     # Substitute your account ID and IAM service role name below.
 
     #TODO 1: Replace with your IAM ARN Role for external-dns
-    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNTID:role/eksctl-vietvn-addon-iamserviceaccount-default-Role1-ri8RmLMpMwHY
+    eks.amazonaws.com/role-arn: arn:aws:iam::274595021951:role/eksctl-vietvn-addon-iamserviceaccount-default-Role1-SWj32Uz8IjFD
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -24,6 +24,9 @@ rules:
   - apiGroups: ['']
     resources: ['nodes']
     verbs: ['list', 'watch']
+  - apiGroups: ['discovery.k8s.io']
+    resources: ['endpointslices']
+    verbs: ['get', 'watch', 'list']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -67,9 +70,9 @@ spec:
             - --source=ingress
             # Change-3: Commented line 65 and 67 - --domain-filter=external-dns-test.my-org.com # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
             - --provider=aws
-            # Change-3: Commented line 65 and 67  - --policy=upsert-only # would prevent ExternalDNS from deleting any records, omit to enable full synchronization
+            - --policy=upsert-only # prevents ExternalDNS from deleting any records; use sync for full synchronization
             - --aws-zone-type=public # only look at public hosted zones (valid values are public, private or no value for both)
-            - --registry=txt
-            - --txt-owner-id=my-hostedzone-identifier
+            - --registry=noop # no TXT ownership records; only the main record (e.g. xxx.demo.vietaws.com) is created
+            - --exclude-record-types=AAAA # IPv4 only: do not create AAAA alias records
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes and AWS token files

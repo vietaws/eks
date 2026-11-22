@@ -6,7 +6,7 @@ metadata:
     app: home
   namespace: fargate-ns
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: home
@@ -22,11 +22,10 @@ spec:
             - containerPort: 8080
           resources:
             requests:
-              memory: "128Mi"
+              memory: "500Mi"
               cpu: "500m"
             limits:
               memory: "500Mi"
-              cpu: "1000m"
 ---
 apiVersion: v1
 kind: Service

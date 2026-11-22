@@ -24,7 +24,7 @@ Ingress/Service (hostname annotation)
 eksctl create iamserviceaccount \
   --name external-dns --namespace default \
   --cluster vietvn \
-  --attach-policy-arn arn:aws:iam::ACCOUNT_ID:policy/AllowExternalDNSUpdates \
+  --attach-policy-arn arn:aws:iam::274595021951:policy/AllowExternalDNSUpdates \
   --approve --override-existing-serviceaccounts --profile eks
 
 # 3. Deploy ExternalDNS
@@ -45,7 +45,7 @@ dig +short <your-host>.<your-domain>
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f ./manifests
-eksctl delete iamserviceaccount --name external-dns --namespace default --cluster eksdemo --profile eks
+eksctl delete iamserviceaccount --name external-dns --namespace default --cluster vietvn --profile eks
 ```
 
 ## 📝 Notes & cost

@@ -1,8 +1,7 @@
 # 20 — Vertical Pod Autoscaler (VPA)
 
 ## 🎯 Scenario
-Right-size pods automatically by adjusting their **CPU/memory requests** based on observed usage. Where HPA adds *more* pods, VPA makes each pod the *right size* —
-useful for cost savings and for workloads that don't scale horizontally.
+Right-size pods automatically by adjusting their **CPU/memory requests** based on observed usage. Where HPA adds *more* pods, VPA makes each pod the *right size* — useful for cost savings and for workloads that don't scale horizontally.
 
 ## 🗺️ Architecture
 ```
@@ -33,6 +32,29 @@ kubectl apply -f 02-vpa-configure.yaml
 kubectl get vpa
 kubectl describe vpa vpa-vietaws     # see the CPU/memory recommendation
 ```
+## Generate Load
+
+```
+# Generate Load
+
+kubectl run test-load1 --rm --tty -i --restart='Never' --image fortio/fortio:1.77.0 -- load -qps 0 -n 500000 -c 1000 http://vpa-demo-service.default.svc.cluster.local/
+
+kubectl run test-load2 --rm --tty -i --restart='Never' --image fortio/fortio:1.77.0 -- load -qps 0 -n 500000 -c 1000 http://vpa-demo-service.default.svc.cluster.local/
+
+kubectl run test-load3 --rm --tty -i --restart='Never' --image fortio/fortio:1.77.0 -- load -qps 0 -n 500000 -c 1000 http://vpa-demo-service.default.svc.cluster.local/
+
+kubectl run test-load4 --rm --tty -i --restart='Never' --image fortio/fortio:1.77.0 -- load -qps 0 -n 500000 -c 1000 http://vpa-demo-service.default.svc.cluster.local/
+
+kubectl run test-load5 --rm --tty -i --restart='Never' --image fortio/fortio:1.77.0 -- load -qps 0 -n 500000 -c 1000 http://vpa-demo-service.default.svc.cluster.local/
+```
+
+`Note 1` - VPA Updater can re-launch new pod with updated CPU and Memory when
+you atleast have 2 pods in a deployment.
+
+`Note 2` - If we have only one pod, unless we manually delete that pod, it will
+not launch new pod with VPA recommended CPU and memory considerign the
+application availability scenario.
+
 
 ## 🧹 Cleanup
 ```bash

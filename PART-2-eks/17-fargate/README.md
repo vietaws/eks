@@ -38,7 +38,7 @@ kubectl get nodes | grep fargate
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f ./manifests
-eksctl delete fargateprofile --cluster eksdemo --name fp --profile eks
+eksctl delete fargateprofile --cluster vietvn --name fp --profile eks
 ```
 
 ## 📝 Notes & cost

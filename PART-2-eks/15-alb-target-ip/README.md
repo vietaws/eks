@@ -1,8 +1,7 @@
 # 15 — ALB Target-Type `ip`
 
 ## 🎯 Scenario
-Register **pod IPs directly** in the ALB target group (`target-type: ip`) instead of routing through a NodePort (`target-type: instance`). This removes the extra
-node hop and is **required for Fargate** (no nodes to register).
+Register **pod IPs directly** in the ALB target group (`target-type: ip`) instead of routing through a NodePort (`target-type: instance`). This removes the extra node hop and is **required for Fargate** (no nodes to register).
 
 ## 🗺️ Architecture
 ```

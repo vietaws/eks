@@ -1,0 +1,8 @@
+# AWS Load Balancer Controller: default (non-hostNetwork) install. Pods are VPC-routable, so webhooks work.
+clusterName: vietvn-secondary
+region: ap-southeast-1
+vpcId: VPC_ID # terraform output -raw vpc_id
+
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller # bound to the IAM role by EKS Pod Identity (Terraform)

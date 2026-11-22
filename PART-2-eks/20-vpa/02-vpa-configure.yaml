@@ -1,4 +1,4 @@
-apiVersion: autoscaling.k8s.io/v1beta2
+apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
   name: vpa-vietaws
@@ -8,7 +8,8 @@ spec:
     kind: Deployment
     name: vpa-demo-deployment
   updatePolicy:
-    updateMode: "Auto"
+    updateMode: "Recreate" # default: evicts the pod and recreates it with the new requests
+    # updateMode: "InPlaceOrRecreate" # resize the running pod in place (K8s 1.33+, VPA 1.4+); falls back to Recreate if in-place fails
   resourcePolicy:
     containerPolicies:
       - containerName: "*"
