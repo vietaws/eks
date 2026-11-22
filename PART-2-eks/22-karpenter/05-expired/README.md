@@ -4,9 +4,6 @@
 Give every node a **maximum lifetime**. When it is reached, Karpenter replaces the node with a fresh one.
 This forces AMI refreshes and recycles nodes for security hygiene.
 
-> ✅ In API `karpenter.sh/v1`, `expireAfter` lives under `spec.template.spec`. It used to sit under
-> `spec.disruption` in `v1beta1`, and `consolidationPolicy: WhenUnderutilized` was renamed
-> `WhenEmptyOrUnderutilized`.
 
 ## 🗺 Architecture
 ```
@@ -74,11 +71,9 @@ kubectl patch nodepool default --type merge \
 
 ## ✅ Conclusion
 - `expireAfter` caps node lifetime, so every node is eventually replaced by a fresh one on the current AMI.
-- It is a safety net behind drift, not a replacement for it. `terminationGracePeriod` stops a blocking PDB from keeping
-  an expired node forever, at the price of force-deleting pods after that time.
+- It is a safety net behind drift, not a replacement for it. `terminationGracePeriod` stops a blocking PDB from keeping an expired node forever, at the price of force-deleting pods after that time.
 - Expiry disrupts like drift, so the same workload protections apply (see `../06-spot-availability`).
 
 ## 📝 Notes
-- Expiry plus `al2023@latest` is the simplest rolling patch process. For production, pin the AMI alias,
-  promote it through environments, and keep `expireAfter` as the safety net.
+- Expiry plus `al2023@latest` is the simplest rolling patch process. For production, pin the AMI alias, promote it through environments, and keep `expireAfter` as the safety net.
 - The Kubernetes control plane upgrade path is in `../../33-cluster-upgrade`.

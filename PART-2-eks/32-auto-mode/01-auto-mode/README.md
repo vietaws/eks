@@ -1,8 +1,7 @@
 # 32.01 — EKS Auto Mode: what AWS runs for you
 
 ## 🎯 Scenario
-Create a cluster with **no node group and no add-ons**, deploy a web app, a load balancer and an EBS volume,
-and see compute, networking, load balancing, DNS and storage appear without installing anything.
+Create a cluster with **no node group and no add-ons**, deploy a web app, a load balancer and an EBS volume, and see compute, networking, load balancing, DNS and storage appear without installing anything.
 
 ## 🗺 Architecture
 ```
@@ -46,8 +45,7 @@ kubectl get pods -w                             # Pending, then ContainerCreatin
 kubectl get nodeclaims,nodes -o wide
 kubectl get nodes -L eks.amazonaws.com/compute-type,node.kubernetes.io/instance-type,karpenter.sh/capacity-type
 ```
-The node carries `eks.amazonaws.com/compute-type=auto`. Look at the `OS-IMAGE` column: it is an AWS-managed,
-immutable image. There is no SSH and no SSM on these nodes.
+The node carries `eks.amazonaws.com/compute-type=auto`. Look at the `OS-IMAGE` column: it is an AWS-managed, immutable image. There is no SSH and no SSM on these nodes.
 
 ### 3. Load balancing: Service → NLB
 ```bash

@@ -110,6 +110,7 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --namespace "$KARPENTER_NAMESPACE" --create-namespace \
   --set "settings.clusterName=${CLUSTER_NAME}" \
   --set "settings.interruptionQueue=${CLUSTER_NAME}" \
+  --set settings.featureGates.spotToSpotConsolidation=true \
   --set controller.resources.requests.cpu=1 \
   --set controller.resources.requests.memory=1Gi \
   --set controller.resources.limits.cpu=1 \

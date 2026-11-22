@@ -26,7 +26,10 @@ spec:
           values: ["17"]
         - key: karpenter.k8s.aws/instance-memory
           operator: Lt
-          values: ["33Gi"]
+          values: ["32769"] # 32 GiB
+        - key: karpenter.k8s.aws/instance-memory
+          operator: Gt
+          values: ["4095"] # at least 4 GiB: nano/micro/small nodes are too small to boot and join (allocatable memory about 15Mi)
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
@@ -52,6 +55,17 @@ spec:
   # 5. Reschedule the pods: The pod's controller (Deployment or ReplicaSet) creates new pods, and the Kubernetes scheduler places them. They usually land on the new node or on other free capacity, but Karpenter does not choose.
   # 6. Terminate the old instance: This happens once it is drained.
 
-    consolidateAfter: 1m # node must stay unchanged for one minute before Karpenter treats it as a candidate for consolidation
+
+#  # Note: Karpenter does not know whether a pod is in the middle of a transaction. It only sees readiness probes and PodDisruptionBudgets (PDBs). Your app must handle a shutdown gracefully.
+  
+# What happens to a pod being evicted
+# 1. Karpenter evicts the pod, and the PDB decides if the eviction is allowed now.
+# 2. The pod is marked for deletion and removed from the Service endpoints. This update reaches kube-proxy and load balancers a moment later, so a few new requests can still arrive.
+# 3. The preStop hook runs, then the container gets SIGTERM.
+# 4. The app has terminationGracePeriodSeconds (default 30 s) to finish work and exit. After that it gets SIGKILL, and anything unfinished is lost.
+
+# The replacement pod is created by the Deployment as soon as the old pod starts terminating. It does not wait for the old one to finish. That is why you need 2 or more replicas: the others serve traffic while the replacement starts.
+
+    consolidateAfter: 1m # node must stay unchanged for one minute before Karpenter treats it as a candidate for consolidation. Prod env: 5m or 30m is more reasonable. Cost-first: 0s to 30s, with a PDB and a graceful shutdown on every service.
     budgets:
       - nodes: "10%" #  how many nodes can be disrupted at once.

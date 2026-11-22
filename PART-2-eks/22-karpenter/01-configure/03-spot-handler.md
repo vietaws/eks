@@ -28,7 +28,8 @@ Both are allowed when the NodePool has `karpenter.sh/capacity-type In [spot, on-
 ## Spot consolidation
 - **Delete** consolidation (remove a Spot node, pods fit on other nodes) is on by default.
 - **Replace** consolidation (swap a Spot node for a cheaper Spot node) needs the `SpotToSpotConsolidation`
-  feature gate (default `false`) and at least 15 candidate instance types, to avoid a race to the cheapest, riskiest pool.
+  feature gate (default `false`, ALPHA) and at least 15 candidate instance types, to avoid a race to the cheapest, riskiest pool.
+  The install script turns it on with `--set settings.featureGates.spotToSpotConsolidation=true`.
 
 ## Make a workload survive an interruption
 | Control | Purpose |

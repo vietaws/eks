@@ -3,8 +3,7 @@
 ## 🎯 Scenario
 Prove two things with a real app instead of `pause` pods:
 1. **Cost:** Karpenter runs the workload on Spot and the cluster costs a fraction of the On-Demand price.
-2. **Availability:** the app keeps answering while nodes are replaced (drift, consolidation) and even when a Spot
-   node is reclaimed, as long as it has replicas, a PDB and a readiness probe. Without them it goes down.
+2. **Availability:** the app keeps answering while nodes are replaced (drift, consolidation) and even when a Spot node is reclaimed, as long as it has replicas, a PDB and a readiness probe. Without them it goes down.
 
 > This demo scales and replaces **nodes**. It does not upgrade the EKS control plane (see `../../33-cluster-upgrade`).
 

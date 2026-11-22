@@ -15,7 +15,7 @@ Pending pods → Karpenter → EC2 API → launch node (shape from NodePool, AWS
 
 ## 🚀 Steps
 ```bash
-export CLUSTER_NAME=eksdemo
+export CLUSTER_NAME=vietvn2
 export AMI_ALIAS="al2023@latest"      # newest EKS-optimized AL2023 AMI for the cluster's Kubernetes version
 
 # 1. EC2NodeClass (AWS settings) and NodePool (what to launch)
@@ -27,8 +27,45 @@ kubectl get ec2nodeclass,nodepool
 
 # 3. Force node provisioning with a pending workload (1 vCPU per pod)
 kubectl apply -f manifests/app.yaml
+
+# Demo Scale-out: 0 -> 1 -> 8 -> 20
+# Demo Scale-In: Scale 20 -> 8 -> 5 (Watch process scale down: kgp -w)
+
+kubectl get pods -w
+
+kubectl scale deployment inflate --replicas 0
+
+kubectl scale deployment inflate --replicas 1
+
+kubectl scale deployment inflate --replicas 3
+
 kubectl scale deployment inflate --replicas 5
+
+kubectl scale deployment inflate --replicas 8
+
+kubectl scale deployment inflate --replicas 20
 ```
+
+```bash
+#Check SPOT to be Replaced by SPOT
+kubectl get deploy karpenter -n kube-system \
+-o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="FEATURE_GATES")].value}{"\n"}'
+
+ helm get values karpenter -n kube-system | grep -i spotToSpot
+
+ # Turn ON
+ helm upgrade karpenter oci://public.ecr.aws/karpenter/karpenter --version 1.15.3 -n kube-system \
+--reuse-values --set settings.featureGates.spotToSpotConsolidation=true
+
+ # Turn OFF
+ helm upgrade karpenter oci://public.ecr.aws/karpenter/karpenter --version 1.15.3 -n kube-system \
+--reuse-values --set settings.featureGates.spotToSpotConsolidation=false
+
+```
+
+Notes
+  - Restarts: either way, the Karpenter pods restart, because the value is a pod environment variable. Wait with `kubectl rollout status deployment/karpenter -n kube-system`.
+  - Helm overwrite: a kubectl set env change is overwritten the next time you run helm upgrade or install-karpenter.sh, which sets the gate to true. Use Helm if you want the setting to stick.
 
 ## 🔍 Validation
 ```bash
