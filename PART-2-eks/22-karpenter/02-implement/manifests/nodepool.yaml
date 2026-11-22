@@ -1,4 +1,3 @@
-# Karpenter v1 NodePool (karpenter.sh/v1, stable since Karpenter 1.0).
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
@@ -18,20 +17,25 @@ spec:
           values: ["spot", "on-demand"] # Spot first, fall back to on-demand
         - key: karpenter.k8s.aws/instance-category
           operator: In
-          values: ["c", "m", "r"]
+          values: ["t", "c", "m", "r"]
         - key: karpenter.k8s.aws/instance-generation
           operator: Gt
-          values: ["2"]
+          values: ["3"] # allow only 4th generation and newer instances
+        - key: karpenter.k8s.aws/instance-cpu
+          operator: Lt
+          values: ["17"]
+        - key: karpenter.k8s.aws/instance-memory
+          operator: Lt
+          values: ["33Gi"]
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
         name: default
-      expireAfter: 336h # 14 days;
+      expireAfter: 336h # 14 days (Karpenter default is 720h = 30 days)
   limits:
     cpu: 100 # hard cap on the total vCPU this NodePool may launch (protects a demo account)
   disruption:
     consolidationPolicy: WhenEmptyOrUnderutilized # Karpenter shrinking the cluster to cut costs when nodes are underutilized or empty (no pods).  Other options: Never, WhenEmpty
-
 
   # Note: Karpenter will not consolidate nodes that are running pods with the following characteristics:
   #   - Pods with local storage (emptyDir, hostPath, etc.)
@@ -47,8 +51,6 @@ spec:
   # 4. Evict the pods: Eviction respects PodDisruptionBudgets (PDBs). A PDB can pause it until enough other replicas are ready.
   # 5. Reschedule the pods: The pod's controller (Deployment or ReplicaSet) creates new pods, and the Kubernetes scheduler places them. They usually land on the new node or on other free capacity, but Karpenter does not choose.
   # 6. Terminate the old instance: This happens once it is drained.
-
-
 
     consolidateAfter: 1m # node must stay unchanged for one minute before Karpenter treats it as a candidate for consolidation
     budgets:

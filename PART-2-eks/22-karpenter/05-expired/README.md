@@ -26,13 +26,14 @@ metadata:
 spec:
   template:
     spec:
-      expireAfter: 720h           # 30 days. Only s, m, h units are accepted (no "d"); default is 720h
+      expireAfter: 336h           # 14 days, as in ../02-implement. Only s, m, h units are accepted (no "d"); Karpenter default is 720h
       terminationGracePeriod: 48h # hard limit: after this, pods are force-deleted even if a PDB or do-not-disrupt blocks
       # expireAfter: Never        # nodes never expire
 ```
 | Setting | Meaning |
 |---------|---------|
-| `expireAfter: 720h` | Node is replaced after 30 days (default) |
+| `expireAfter: 336h` | Node is replaced after 14 days (this demo) |
+| `expireAfter: 720h` | Node is replaced after 30 days (Karpenter default) |
 | `expireAfter: 360h` | Replace after 15 days (stricter patching policy) |
 | `expireAfter: Never` | Disable expiry (rely on drift for AMI updates) |
 | `terminationGracePeriod` | Upper bound on draining. Without it, a PDB with `maxUnavailable: 0` or a `do-not-disrupt` pod can block an expired node forever |
@@ -68,7 +69,7 @@ Expected: the NodeClaim shows an `Expired` condition, a replacement appears, the
 ```bash
 kubectl delete deployment inflate
 kubectl patch nodepool default --type merge \
-  -p '{"spec":{"template":{"spec":{"expireAfter":"720h"}}}}'    # restore the default
+  -p '{"spec":{"template":{"spec":{"expireAfter":"336h"}}}}'    # restore the value from ../02-implement (14 days)
 ```
 
 ## ✅ Conclusion

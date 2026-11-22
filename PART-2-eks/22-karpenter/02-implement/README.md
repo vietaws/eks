@@ -36,8 +36,7 @@ kubectl get nodeclaims -o wide                       # one NodeClaim per node Ka
 kubectl get nodes -L karpenter.sh/capacity-type,node.kubernetes.io/instance-type,kubernetes.io/arch
 kubectl logs -f -n kube-system -l app.kubernetes.io/name=karpenter -c controller
 ```
-Expected: within about a minute the `inflate` pods are Running on new Spot nodes that are **not** part of
-the managed node group, and the log shows `launched nodeclaim` / `registered nodeclaim`.
+Expected: within about a minute the `inflate` pods are Running on new Spot nodes that are **not** part of the managed node group, and the log shows `launched nodeclaim` / `registered nodeclaim`.
 
 ## 🧹 Cleanup
 ```bash
@@ -48,16 +47,11 @@ kubectl delete ec2nodeclass default
 
 ## ✅ Conclusion
 - Pending pods are enough to make Karpenter create nodes: no node group to resize and no Auto Scaling Group.
-- The NodePool states what is allowed (arch, Spot or On-Demand, instance category, limits). The EC2NodeClass states how
-  it is built on AWS (AMI, subnets, security groups, role). Karpenter picks the cheapest shape that fits.
+- The NodePool states what is allowed (arch, Spot or On-Demand, instance category, limits). The EC2NodeClass states how it is built on AWS (AMI, subnets, security groups, role). Karpenter picks the cheapest shape that fits.
 - Deleting the pods lets Karpenter remove the nodes again. To scale back, follow `../03-consolidation`.
 - To prove cost and uptime with a real app, continue with `../06-spot-availability`.
 
 ## 📝 Notes & cost
-- **What changed from v1beta1:** `nodeClassRef` is `group`/`kind`/`name`; `expireAfter` moved under
-  `spec.template.spec`; the consolidation policy is `WhenEmptyOrUnderutilized` (was `WhenUnderutilized`);
-  `amiSelectorTerms` is required (use `alias: al2023@latest` or a pinned `al2023@v20xxxxxx`).
-- Allowing both `amd64` + `arm64` and `spot` + `on-demand` lets Karpenter pick the cheapest instance that fits.
-  That is the core cost lever.
+- Allowing both `amd64` + `arm64` and `spot` + `on-demand` lets Karpenter pick the cheapest instance that fits. That is the core cost lever.
 - `limits.cpu: 100` caps the pool. Remove or raise it only on purpose.
 - Karpenter is **self-managed**: you own its upgrades and its IAM. `32-auto-mode` shows the managed alternative.

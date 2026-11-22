@@ -51,7 +51,7 @@ Short definitions for the words used in this demo. Terms are grouped by topic, e
 | **Consolidation** | Removing empty nodes and repacking or replacing under-used nodes to cut cost. Policy `consolidationPolicy`: `WhenEmpty`, `WhenEmptyOrUnderutilized`, `Balanced`. |
 | **`consolidateAfter`** | How long a node must stay empty or under-used before Karpenter acts. `Never` turns consolidation off. |
 | **Drift** | A running node no longer matches its NodePool or EC2NodeClass, for example a changed requirement, label, subnet, or a new AMI. Karpenter replaces it. |
-| **Expiration (`expireAfter`)** | Maximum node lifetime (default `720h`). After it, the node is replaced even if nothing else changed. `Never` disables it. |
+| **Expiration (`expireAfter`)** | Maximum node lifetime (Karpenter default `720h`, 30 days; the demo NodePool uses `336h`, 14 days). After it, the node is replaced even if nothing else changed. `Never` disables it. |
 | **`terminationGracePeriod`** | On a NodePool, the longest time a node may spend draining. After it, remaining pods are force-deleted, even if a PDB or `do-not-disrupt` would block them. |
 | **Disruption budget** (`disruption.budgets`) | Limit on how many nodes of a NodePool may be disrupted at once, as a number or percent, optionally per reason (`Drifted`, `Underutilized`, `Empty`) and per cron schedule. `nodes: "0"` freezes voluntary disruption. |
 | **Disrupted taint** | `karpenter.sh/disrupted:NoSchedule`, added to a node about to be drained so no new pods land on it. |
