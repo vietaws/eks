@@ -1,0 +1,64 @@
+# Custom Auto Mode NodePool: Spot + Graviton for batch work. Same karpenter.sh/v1 NodePool API as 22-karpenter, but:
+#  - nodeClassRef points at the Auto Mode NodeClass (group eks.amazonaws.com), not an EC2NodeClass
+#  - instance labels use the eks.amazonaws.com/ prefix instead of karpenter.k8s.aws/
+#  - kubernetes.io/os is not supported (Auto Mode is Linux only)
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: spot-arm
+spec:
+  template:
+    metadata:
+      labels:
+        workload: batch
+    spec:
+      nodeClassRef:
+        group: eks.amazonaws.com
+        kind: NodeClass
+        name: default # created by Auto Mode; do not edit it, create your own NodeClass for custom settings
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot"]
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["arm64"]
+        - key: eks.amazonaws.com/instance-category
+          operator: In
+          values: ["c", "m", "r"]
+        - key: eks.amazonaws.com/instance-cpu
+          operator: In
+          values: ["2", "4", "8"]
+      expireAfter: 168h # 7 days. Auto Mode never lets a node live longer than 21 days
+  limits:
+    cpu: "20" # cap the demo
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 1m
+    budgets:
+      - nodes: "10%"
+---
+# A batch pod that can only run on the pool above.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: batch
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: batch
+  template:
+    metadata:
+      labels:
+        app: batch
+    spec:
+      nodeSelector:
+        workload: batch
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: batch
+          image: public.ecr.aws/eks-distro/kubernetes/pause:3.7
+          resources:
+            requests:
+              cpu: 1

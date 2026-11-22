@@ -1,0 +1,35 @@
+# Shared demo cluster, MODE=standard. Rendered by scripts/up.sh (the ${...} tokens are replaced with sed).
+# Used by: 22-karpenter, 33-cluster-upgrade (managed node group and Karpenter clusters), and any demo that needs a plain cluster.
+# NODE_TYPE, NODE_COUNT and NODE_MAX come from up.sh (defaults t9g.medium, 2, 4).
+#
+#  - IAM OIDC provider enabled (IRSA) + EKS Pod Identity agent add-on (Pod Identity)
+#  - one PUBLIC managed node group (nodes get public IPs, no NAT needed for node traffic)
+#  - subnets/security groups tagged karpenter.sh/discovery so Karpenter can find them
+#  - vpc-cni, kube-proxy and coredns are installed as EKS add-ons by default
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${AWS_REGION}
+  version: "${K8S_VERSION}"
+  tags:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+
+iam:
+  withOIDC: true
+
+addons:
+  - name: eks-pod-identity-agent
+
+managedNodeGroups:
+  - name: ${CLUSTER_NAME}-ng
+    instanceType: ${NODE_TYPE}
+    amiFamily: AmazonLinux2023
+    desiredCapacity: ${NODE_COUNT}
+    minSize: ${NODE_COUNT}
+    maxSize: ${NODE_MAX}
+    volumeSize: 20
+    privateNetworking: false # public node group
+    updateConfig:
+      maxUnavailable: 1 # rolling node group upgrades replace one node at a time

@@ -71,7 +71,7 @@ kubectl get ingress overlay-alb -w              # wait for ADDRESS (about 2-3 mi
 
 # BEFORE: free IPs in the subnets (the ALB already took its few IPs)
 SUBNETS=$(terraform output -json public_subnet_ids | jq -r 'join(" ")')
-aws ec2 describe-subnets --subnet-ids $SUBNETS --profile eks \
+aws ec2 describe-subnets --subnet-ids $SUBNETS \
   --query 'Subnets[].{Subnet:SubnetId,Cidr:CidrBlock,Free:AvailableIpAddressCount}' --output table
 ```
 
@@ -91,11 +91,11 @@ kubectl get pods -l app=app -o wide --no-headers | awk '{print $7}' | sort | uni
 kubectl get pods -l app=app -o wide | head -5
 
 # 3. AFTER: free IPs in the subnets must equal the BEFORE reading
-aws ec2 describe-subnets --subnet-ids $SUBNETS --profile eks \
+aws ec2 describe-subnets --subnet-ids $SUBNETS \
   --query 'Subnets[].{Subnet:SubnetId,Cidr:CidrBlock,Free:AvailableIpAddressCount}' --output table
 
 # 4. No pod ENIs: the VPC CNI names the ENIs it creates "aws-K8S-<instance-id>"
-aws ec2 describe-network-interfaces --profile eks \
+aws ec2 describe-network-interfaces \
   --filters Name=vpc-id,Values=$(terraform output -raw vpc_id) Name=description,Values='aws-K8S-*' \
   --query 'NetworkInterfaces[].NetworkInterfaceId'                                  # expect []
 
@@ -120,7 +120,7 @@ kubectl delete -f ../manifests/03-alb.yaml
 kubectl delete -f ../manifests/01-app.yaml -f ../manifests/02-ingress-class.yaml
 kubectl delete pod client
 helm uninstall aws-load-balancer-controller -n kube-system
-# wait until the ALB is gone (EC2 console, or: aws elbv2 describe-load-balancers --profile eks)
+# wait until the ALB is gone (EC2 console, or: aws elbv2 describe-load-balancers)
 terraform destroy -var create_nodes=true
 ```
 

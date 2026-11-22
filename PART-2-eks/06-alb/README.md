@@ -27,7 +27,7 @@ Ingress (IngressClass: aws-ingress-class)
 curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
 aws iam create-policy \
   --policy-name AWSLoadBalancerControllerIAMPolicy \
-  --policy-document file://iam_policy.json --profile eks
+  --policy-document file://iam_policy.json
 
 # 2. IRSA service account (replace ACCOUNT_ID and cluster name)
 eksctl create iamserviceaccount \
@@ -35,7 +35,7 @@ eksctl create iamserviceaccount \
   --name=aws-load-balancer-controller \
   --role-name AmazonEKSLoadBalancerControllerRole \
   --attach-policy-arn=arn:aws:iam::274595021951:policy/AWSLoadBalancerControllerIAMPolicy \
-  --override-existing-serviceaccounts --approve --profile eks
+  --override-existing-serviceaccounts --approve
 
 # 3. Install via Helm
 helm repo add eks https://aws.github.io/eks-charts && helm repo update

@@ -58,7 +58,7 @@ kubectl apply -f ../manifests/01-app.yaml -f ../manifests/02-ingress-class.yaml 
 # Reading helpers (used after every stage)
 PRIMARY=$(terraform output -json primary_subnet_ids | jq -r 'join(" ")')
 PODS=$(terraform output -json pod_subnet_ids | jq -r 'join(" ")')
-free() { aws ec2 describe-subnets --profile eks --subnet-ids $PRIMARY $PODS \
+free() { aws ec2 describe-subnets --subnet-ids $PRIMARY $PODS \
   --query 'Subnets[].{Subnet:SubnetId,Cidr:CidrBlock,Free:AvailableIpAddressCount}' --output table; }
 free        # BASELINE
 
@@ -96,7 +96,7 @@ kubectl get pods -l app=app -o wide --no-headers | awk '{print $7}' | sort | uni
 kubectl get pods -l app=app -o wide | head -5
 
 # Pod ENIs live in the secondary subnets, with /28 prefixes in stage 2
-aws ec2 describe-network-interfaces --profile eks \
+aws ec2 describe-network-interfaces \
   --filters Name=vpc-id,Values=$(terraform output -raw vpc_id) Name=description,Values='aws-K8S-*' \
   --query 'NetworkInterfaces[].{Subnet:SubnetId,Prefixes:Ipv4Prefixes[].Ipv4Prefix}'
 

@@ -1,0 +1,16 @@
+# Karpenter v1 EC2NodeClass. Apply with:  envsubst < ec2nodeclass.yaml | kubectl apply -f -
+# Needs: CLUSTER_NAME (cluster name) and AMI_ALIAS (for example al2023@latest).
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  role: "KarpenterNodeRole-${CLUSTER_NAME}" # created by the CloudFormation stack in 01-configure/04-install.md
+  amiSelectorTerms: # required in v1
+    - alias: "${AMI_ALIAS}" # al2023@latest tracks the newest EKS-optimized AL2023 AMI; al2023@v20xxxxxx pins one release
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"

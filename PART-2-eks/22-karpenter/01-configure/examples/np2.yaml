@@ -1,10 +1,14 @@
-apiVersion: karpenter.sh/v1beta1
+apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
   name: np2
 spec:
   template:
     spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: team-a
       requirements:
         - key: "node.kubernetes.io/instance-type"
           operator: In

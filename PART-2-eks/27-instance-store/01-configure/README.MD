@@ -44,7 +44,7 @@ kubectl get pv
 ```bash
 kubectl delete -f manifests
 # CRITICAL: delete the instance-store node group so the large EC2 stops billing
-eksctl delete nodegroup --cluster eksdemo --name <ng-name> --profile eks
+eksctl delete nodegroup --cluster eksdemo --name <ng-name>
 ```
 
 ## 📝 Notes & cost

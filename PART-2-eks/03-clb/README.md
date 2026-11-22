@@ -36,7 +36,7 @@ curl http://<EXTERNAL-IP>
 ```bash
 kubectl delete -f ./manifests
 # Confirm the ELB is gone (it bills per hour):
-aws elb describe-load-balancers --profile eks --region ap-southeast-1
+aws elb describe-load-balancers --region ap-southeast-1
 ```
 
 ## 📝 Notes & cost

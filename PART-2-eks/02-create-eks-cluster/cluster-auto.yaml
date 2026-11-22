@@ -1,0 +1,22 @@
+# Shared demo cluster, MODE=auto (EKS Auto Mode). Rendered by scripts/up.sh (the ${...} tokens are replaced with sed).
+# Used by: 32-auto-mode.
+#
+#  - Auto Mode manages compute (managed Karpenter), pod networking, load balancing, DNS and block storage
+#  - NO node group: eksctl refuses managed/self-managed node groups at creation time when Auto Mode is on,
+#    and Auto Mode launches its own EC2 nodes into the cluster's PRIVATE subnets (one NAT gateway, eksctl default)
+#  - IAM OIDC provider enabled so IRSA based demos still work
+#  - the Pod Identity agent add-on is not needed on Auto Mode
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${AWS_REGION}
+  version: "${K8S_VERSION}"
+
+iam:
+  withOIDC: true
+
+autoModeConfig:
+  enabled: true
+  nodePools: ["general-purpose", "system"] # the two built-in NodePools (AWS suggests leaving this unset)

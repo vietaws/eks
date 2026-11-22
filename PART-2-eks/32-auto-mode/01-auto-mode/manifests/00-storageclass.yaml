@@ -1,0 +1,16 @@
+# EKS Auto Mode does NOT create a StorageClass for you. This one uses the built-in EBS capability
+# (provisioner ebs.csi.eks.amazonaws.com): no EBS CSI driver add-on to install or upgrade.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: auto-ebs-sc
+provisioner: ebs.csi.eks.amazonaws.com
+volumeBindingMode: WaitForFirstConsumer
+allowedTopologies:
+  - matchLabelExpressions:
+      - key: eks.amazonaws.com/compute-type
+        values:
+          - auto # only schedule consumers on Auto Mode nodes
+parameters:
+  type: gp3
+  encrypted: "true"

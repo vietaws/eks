@@ -11,7 +11,7 @@ Each demo is self-contained and documented with the **same README structure** so
 | #  | Folder                        | Topic                                   | Creates billable resources? |
 |----|-------------------------------|-----------------------------------------|-----------------------------|
 | 01 | `01-prep`                     | Install AWS CLI, eksctl, kubectl        | No                          |
-| 02 | `02-create-eks-cluster`       | Create cluster + node group (eksctl)    | **Yes** (EKS + EC2)         |
+| 02 | `02-create-eks-cluster`       | Shared `up.sh` / `down.sh`: cluster + OIDC + public node group, or Auto Mode | **Yes** (EKS + EC2)         |
 | 03 | `03-clb`                      | Classic Load Balancer (legacy)          | **Yes** (CLB)               |
 | 04 | `04-nlb`                      | Network Load Balancer                   | **Yes** (NLB)               |
 | 05 | `05-nlb-internal`             | Internal NLB                            | **Yes** (NLB)               |
@@ -31,7 +31,7 @@ Each demo is self-contained and documented with the **same README structure** so
 | 19 | `19-hpa`                      | Horizontal Pod Autoscaler               | No (uses existing nodes)    |
 | 20 | `20-vpa`                      | Vertical Pod Autoscaler                 | No                          |
 | 21 | `21-cluster-autoscaler`       | Cluster Autoscaler (classic)            | **Yes** (EC2 scale-out)     |
-| 22 | `22-karpenter`                | Karpenter node autoscaling              | **Yes** (EC2 scale-out)     |
+| 22 | `22-karpenter`                | Karpenter 1.15 node autoscaling, consolidation, drift, expiry | **Yes** (EC2 scale-out)     |
 | 23 | `23-ebs`                      | EBS CSI driver + dynamic provisioning   | **Yes** (EBS)               |
 | 24 | `24-max-pod`                  | Max pods per node (ENI/IP math)         | No                          |
 | 25 | `25-multi-az-pods`            | Multi-AZ PV scheduling                  | **Yes** (EBS)               |
@@ -40,6 +40,9 @@ Each demo is self-contained and documented with the **same README structure** so
 | 28 | `28-terraform`                | Provision EKS with Terraform            | **Yes** (EKS + EC2 + NAT)   |
 | 29 | `29-argocd`                   | GitOps with Argo CD + Helm              | **Yes** (runs on cluster)   |
 | 30 | `30-no-vpc-ip-pods`           | Pods without VPC subnet IPs (Cilium overlay, secondary CIDR) | **Yes** (EKS + EC2 + ALB) |
+| 31 | `31-overlay-eksctl`           | Cilium overlay and secondary CIDR, built with eksctl | **Yes** (EKS + EC2 + ALB) |
+| 32 | `32-auto-mode`                | EKS Auto Mode capabilities and how it differs from Karpenter | **Yes** (EKS + EC2 + NLB + NAT) |
+| 33 | `33-cluster-upgrade`          | Upgrade runbook 1.36 → 1.37 on managed node group, Karpenter and Auto Mode, with downtime checks and cost | **Yes** (3 × EKS + EC2 + NLB + NAT) |
 
 ---
 

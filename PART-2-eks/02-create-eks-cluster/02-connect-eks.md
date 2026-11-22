@@ -11,7 +11,7 @@ aws eks update-kubeconfig --alias <alias> --name <clustername> --region <region>
 Example
 
 ```
-aws eks update-kubeconfig --alias vietvn --name vietvn --profile eks
+aws eks update-kubeconfig --alias vietvn --name vietvn
 ```
 
 Output

@@ -19,7 +19,7 @@ i3.4xlarge → 2 NVMe disks mounted under /mnt/fast-disks/<uuid>
 ## 🚀 Steps
 ```bash
 # 1. Create the instance-store node group (pre-bootstrap mounts each NVMe disk)
-eksctl create nodegroup -f ng.yaml --profile eks
+eksctl create nodegroup -f ng.yaml
 
 # 2. Pin the demo app to that node and create the PVC
 #    Edit manifests/02-app.yaml -> spec.nodeName (from: kubectl get nodes)
@@ -37,7 +37,7 @@ kubectl exec -it <app-pod> -- df -BG | grep fast-disks
 ```bash
 kubectl delete -f manifests
 kubectl delete pv --all                # local PVs are Retain by default
-eksctl delete nodegroup --cluster eksdemo --name eks-pv-nvme-ng --profile eks
+eksctl delete nodegroup --cluster eksdemo --name eks-pv-nvme-ng
 ```
 
 ## 📝 Notes & cost

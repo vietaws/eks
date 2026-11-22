@@ -1,0 +1,21 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/nodegroup-s2.yaml
+#
+# Stage 2: custom networking + prefix delegation. AWS recommends NEW nodes when switching from IPs to prefixes.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+managedNodeGroups:
+  - name: ${NODEGROUP_PREFIX}2
+    instanceType: ${INSTANCE_TYPE}
+    desiredCapacity: ${NODE_DESIRED}
+    minSize: ${NODE_MIN}
+    maxSize: ${NODE_MAX}
+    amiFamily: AmazonLinux2023
+    privateNetworking: false # public subnets + public IPs, no NAT gateway
+    volumeSize: ${NODE_VOLUME_SIZE}
+    maxPodsPerNode: ${MAX_PODS_STAGE2} # prefix delegation lifts the ENI limit

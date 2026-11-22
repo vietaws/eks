@@ -1,0 +1,19 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/addons-s1.yaml
+#
+# Stage 1: VPC CNI custom networking. ENIConfig name = AZ name (see scripts/eniconfig.sh).
+# Applied BEFORE the stage-1 node group is created (scripts/stage.sh 1).
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+
+addons:
+  - name: vpc-cni
+    resolveConflicts: overwrite
+    configurationValues: |-
+      {"env": {
+        "AWS_VPC_K8S_CNI_CUSTOM_NETWORK_CFG": "true",
+        "ENI_CONFIG_LABEL_DEF": "topology.kubernetes.io/zone"
+      }}

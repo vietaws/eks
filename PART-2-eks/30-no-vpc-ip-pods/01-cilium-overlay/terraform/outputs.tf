@@ -15,5 +15,5 @@ output "public_subnet_ids" {
 }
 
 output "kubeconfig_command" {
-  value = "aws eks update-kubeconfig --name ${aws_eks_cluster.this.name} --region ${var.region} --profile ${var.profile}"
+  value = "aws eks update-kubeconfig --name ${aws_eks_cluster.this.name} --region ${var.region}${var.profile == null ? "" : " --profile ${var.profile}"}"
 }

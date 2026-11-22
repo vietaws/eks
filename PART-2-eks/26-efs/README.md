@@ -22,7 +22,7 @@ Use the **Amazon EFS CSI driver** for `ReadWriteMany` storage that multiple pods
 ```bash
 # Install driver (managed add-on recommended)
 aws eks create-addon --cluster-name eksdemo --addon-name aws-efs-csi-driver \
-  --service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EFS_CSI_DriverRole --profile eks
+  --service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EFS_CSI_DriverRole
 
 # Work through 01-config → 06-fargate
 ```

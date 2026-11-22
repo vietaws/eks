@@ -25,7 +25,7 @@ eksctl create iamserviceaccount \
   --name external-dns --namespace default \
   --cluster vietvn \
   --attach-policy-arn arn:aws:iam::274595021951:policy/AllowExternalDNSUpdates \
-  --approve --override-existing-serviceaccounts --profile eks
+  --approve --override-existing-serviceaccounts
 
 # 3. Deploy ExternalDNS
 #    Edit manifests/01-external-dns.yaml:
@@ -45,7 +45,7 @@ dig +short <your-host>.<your-domain>
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f ./manifests
-eksctl delete iamserviceaccount --name external-dns --namespace default --cluster vietvn --profile eks
+eksctl delete iamserviceaccount --name external-dns --namespace default --cluster vietvn
 ```
 
 ## 📝 Notes & cost

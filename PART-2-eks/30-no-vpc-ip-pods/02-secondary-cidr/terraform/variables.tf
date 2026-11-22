@@ -1,6 +1,6 @@
 variable "profile" {
   type    = string
-  default = "eks"
+  default = null # null = default AWS credential chain
 }
 
 variable "region" {

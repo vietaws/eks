@@ -1,0 +1,9 @@
+# TEMPLATE: values come from ../config.env. Scripts use the rendered copy in .rendered/manifests/.
+# AWS Load Balancer Controller: default (non-hostNetwork) install. Pods are VPC-routable, so webhooks work.
+clusterName: ${CLUSTER_NAME}
+region: ${REGION}
+vpcId: VPC_ID # set by scripts/up.sh (--set vpcId=...)
+
+serviceAccount:
+  create: true
+  name: ${LBC_SERVICE_ACCOUNT} # bound to the IAM role by EKS Pod Identity (cluster.yaml)

@@ -1,0 +1,19 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/pod-identity.yaml
+#
+# IAM for the AWS Load Balancer Controller via EKS Pod Identity (no OIDC provider needed).
+# The service account itself is created by the Helm chart (createServiceAccount: false).
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+
+iam:
+  podIdentityAssociations:
+    - namespace: kube-system
+      serviceAccountName: ${LBC_SERVICE_ACCOUNT}
+      createServiceAccount: false
+      roleName: ${LBC_ROLE_NAME}
+      wellKnownPolicies:
+        awsLoadBalancerController: true

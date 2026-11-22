@@ -1,0 +1,20 @@
+# TEMPLATE: values come from ../config.env. Scripts use the rendered copy in .rendered/manifests/.
+# Cilium overlay (VXLAN) on EKS. Pods get IPs from clusterPool, NOT from VPC subnets.
+# Chart: cilium/cilium (version: CILIUM_VERSION in config.env)  https://docs.cilium.io/en/stable/installation/k8s-install-helm/
+routingMode: tunnel
+tunnelProtocol: vxlan
+
+eni:
+  enabled: false # overlay mode (the default). true = pods get VPC ENI IPs.
+
+ipam:
+  mode: cluster-pool
+  operator:
+    # Must NOT overlap VPC_CIDR or SERVICE_CIDR (checked by scripts/up.sh).
+    # Cilium's default pool is 10.0.0.0/8, which would overlap a 10.x VPC.
+    clusterPoolIPv4PodCIDRList:
+      - ${POD_CIDR}
+    clusterPoolIPv4MaskSize: ${POD_CIDR_MASK_SIZE} # block per node, must hold MAX_PODS
+
+# Pod -> outside the cluster (VPC, internet) is SNAT'd to the node's primary IP.
+enableIPv4Masquerade: true

@@ -21,8 +21,7 @@ Fargate profile (selector: namespace=fargate-ns)
 eksctl create fargateprofile \
   --cluster vietvn \
   --name fp \
-  --namespace fargate-ns \
-  --profile eks
+  --namespace fargate-ns
 
 # 2. Deploy the app + Ingress into that namespace
 kubectl apply -f ./manifests
@@ -38,7 +37,7 @@ kubectl get nodes | grep fargate
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f ./manifests
-eksctl delete fargateprofile --cluster vietvn --name fp --profile eks
+eksctl delete fargateprofile --cluster vietvn --name fp
 ```
 
 ## 📝 Notes & cost

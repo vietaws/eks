@@ -1,0 +1,46 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/cluster.yaml
+#
+# eksctl config for the secondary-CIDR demo (replica of 30-no-vpc-ip-pods/02-secondary-cidr).
+# Control plane + VPC only. The node groups live in nodegroup-s0/s1/s2.yaml, one per stage.
+# Public subnets for nodes and the ALB, NO NAT gateway.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+# eksctl creates the VPC and splits its CIDR itself (vpc.subnets is only for IMPORTING existing
+# subnets, so explicit CIDRs fail with "can't describe subnet by CIDR without VPC ID").
+availabilityZones: ["${AZ_1}", "${AZ_2}"]
+
+vpc:
+  # With 2 AZs eksctl splits the VPC CIDR into 8 equal blocks (a /24 gives 8 x /27, 27 usable IPs each):
+  #   block 0-1  public, one per AZ   -> nodes (primary ENI), ALB, and stage-0 pods
+  #   block 2-3  private, one per AZ  -> no NAT, no nodes; EKS may place control-plane ENIs here
+  #   block 4-7  left free
+  cidr: ${VPC_CIDR}
+  # NOTE: extraCIDRs does NOT associate the CIDR with the VPC. eksctl only adds an HTTPS ingress rule
+  # for it to the control-plane security group. scripts/secondary-cidr.sh does the association and
+  # creates the pod subnets.
+  extraCIDRs: ["${SECONDARY_CIDR}"]
+  nat:
+    gateway: Disable # no NAT gateway: nodes use public IPs
+
+kubernetesNetworkConfig:
+  serviceIPv4CIDR: ${SERVICE_CIDR}
+
+# vpc-cni, kube-proxy and coredns are installed as EKS add-ons by default (stage 0 = stock VPC CNI).
+addons:
+  - name: eks-pod-identity-agent
+
+iam:
+  podIdentityAssociations:
+    # IAM for the AWS Load Balancer Controller via EKS Pod Identity. The Helm chart creates the service account.
+    - namespace: kube-system
+      serviceAccountName: ${LBC_SERVICE_ACCOUNT}
+      createServiceAccount: false
+      roleName: ${LBC_ROLE_NAME}
+      wellKnownPolicies:
+        awsLoadBalancerController: true

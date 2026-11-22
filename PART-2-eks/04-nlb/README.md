@@ -30,7 +30,7 @@ curl http://<EXTERNAL-IP>
 ## 🧹 Cleanup
 ```bash
 kubectl delete -f ./manifests
-aws elbv2 describe-load-balancers --profile eks --region ap-southeast-1
+aws elbv2 describe-load-balancers --region ap-southeast-1
 ```
 
 ## 📝 Notes & cost

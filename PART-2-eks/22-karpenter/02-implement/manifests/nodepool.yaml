@@ -1,0 +1,36 @@
+# Karpenter v1 NodePool (karpenter.sh/v1, stable since Karpenter 1.0).
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    spec:
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64", "arm64"] # allow Graviton for cost savings
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["spot", "on-demand"] # Spot first, fall back to on-demand
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m", "r"]
+        - key: karpenter.k8s.aws/instance-generation
+          operator: Gt
+          values: ["2"]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      expireAfter: 720h # 30 days; v1 moved this from `disruption` to the template spec
+  limits:
+    cpu: 100 # hard cap on the total vCPU this NodePool may launch (protects a demo account)
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized # v1 name (was WhenUnderutilized)
+    consolidateAfter: 1m
+    budgets:
+      - nodes: "10%" # at most 10% of this pool's nodes disrupted at once (the v1 default)

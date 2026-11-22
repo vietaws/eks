@@ -19,7 +19,7 @@ Define **several Fargate profiles** (e.g. one per app/namespace) from a single Y
 ## 🚀 Steps
 ```bash
 # 1. Create all Fargate profiles from file
-eksctl create fargateprofile -f 01-fp.yaml --profile eks
+eksctl create fargateprofile -f 01-fp.yaml
 
 # 2. Deploy namespaces, apps, and ingresses
 kubectl apply -R -f ./manifests
@@ -27,7 +27,7 @@ kubectl apply -R -f ./manifests
 
 ## 🔍 Validation
 ```bash
-eksctl get fargateprofile --cluster eksdemo --profile eks
+eksctl get fargateprofile --cluster eksdemo
 kubectl get pods -A -o wide | grep fargate
 kubectl get ingress -A
 ```
@@ -35,9 +35,9 @@ kubectl get ingress -A
 ## 🧹 Cleanup
 ```bash
 kubectl delete -R -f ./manifests
-eksctl delete fargateprofile --cluster eksdemo --name home-fp --profile eks
-eksctl delete fargateprofile --cluster eksdemo --name app1-fp --profile eks
-eksctl delete fargateprofile --cluster eksdemo --name app2-fp --profile eks
+eksctl delete fargateprofile --cluster eksdemo --name home-fp
+eksctl delete fargateprofile --cluster eksdemo --name app1-fp
+eksctl delete fargateprofile --cluster eksdemo --name app2-fp
 ```
 
 ## 📝 Notes & cost

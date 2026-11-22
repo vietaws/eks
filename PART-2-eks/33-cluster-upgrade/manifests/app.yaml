@@ -1,0 +1,90 @@
+# Hardened test app for the upgrade runbook. Rendered by scripts/deploy-app.sh (envsubst fills SEL_KEY, SEL_VAL, LB_CLASS).
+#  - 3 replicas on separate nodes (hostname spread), spread over zones when possible
+#  - readiness probe, preStop delay longer than the load balancer deregistration delay
+#  - PDB: one pod at a time. Rolling update never drops below capacity
+# On t9g.small (2 vCPU, 2 GiB) the request below leaves room for the system pods on each node.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  replicas: 3
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      terminationGracePeriodSeconds: 45
+      nodeSelector:
+        "${SEL_KEY}": "${SEL_VAL}"
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: web
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: web
+      containers:
+        - name: web
+          image: vietaws/eks:home # multi-arch (amd64 + arm64)
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 25 # keep serving until the NLB has deregistered the pod (deregistration delay is 20 s)
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: deregistration_delay.timeout_seconds=20
+spec:
+  type: LoadBalancer
+  loadBalancerClass: "${LB_CLASS}" # service.k8s.aws/nlb (controller you installed) or eks.amazonaws.com/nlb (Auto Mode)
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP

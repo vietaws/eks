@@ -16,7 +16,7 @@ Scr: AWS Blog
 
 ```
 # Check Installed Addons
-aws eks list-addons --cluster-name  vietaws6 --profile eks
+aws eks list-addons --cluster-name  vietaws6
 kubectl get csidriver ebs.csi.aws.com
 ```
 
@@ -55,11 +55,11 @@ Role name: `AmazonEKS_EBS_CSI_DriverRole`
 
 ```
 # Check OIDC on EKS
-aws eks describe-cluster --name vietaws6 --profile eks --query "cluster.identity.oidc.issuer" --output text
+aws eks describe-cluster --name vietaws6 --query "cluster.identity.oidc.issuer" --output text
 # Output: https://oidc.eks.ap-southeast-1.amazonaws.com/id/OIDC_ID
 
 # Check OIDC Provider on AWS
-aws iam list-open-id-connect-providers --profile eks | grep OIDC_ID
+aws iam list-open-id-connect-providers | grep OIDC_ID
 #Output: "Arn": "arn:aws:iam::ACCOUNT_ID:oidc-provider/oidc.eks.ap-southeast-1.amazonaws.com/id/OIDC_ID"
 
 # Create IAM Trust Policy
@@ -89,33 +89,33 @@ EOF
 # Remember to change Role Name if it is existed
 aws iam create-role \
  --role-name AmazonEKS_EBS_CSI_DriverRole6 \
- --assume-role-policy-document file://"trust-policy.json" --profile eks
+ --assume-role-policy-document file://"trust-policy.json"
 
 # Attach AmazonEBSCSIDriverPolicy
 aws iam attach-role-policy \
 --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
---role-name AmazonEKS_EBS_CSI_DriverRole6 --profile eks
+--role-name AmazonEKS_EBS_CSI_DriverRole6
 
 # Check the EKS add-on tab on AWS Management Console
-eksctl get addons --cluster vietaws6 --profile eks
+eksctl get addons --cluster vietaws6
 
 # Approach 1 - install by using aws cli, eksctl (or Helm, Kustomize) - RECOMMENDED
 aws eks create-addon \
 --cluster-name vietaws6 \
 --addon-name aws-ebs-csi-driver \
---service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EBS_CSI_DriverRole6 --profile eks
+--service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EBS_CSI_DriverRole6
 
 # Approach 2 - Using eksctl - https://docs.aws.amazon.com/eks/latest/userguide/managing-ebs-csi.html
 eksctl create addon --name aws-ebs-csi-driver --cluster vietaws6 \
 --service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EBS_CSI_DriverRole6 \
---force --profile eks
+--force
 
 
 # Verify addon
 1 - Go to AWS Management console. You will see the new Add-on and attached iam role
-2 - eksctl get addons --cluster vietaws5 --profile eks # https://eksctl.io/usage/addons/
+2 - eksctl get addons --cluster vietaws5 # https://eksctl.io/usage/addons/
 3 - kubectl get pods -n kube-system
-4 - aws eks list-addons --cluster-name  vietaws5 --profile eks
+4 - aws eks list-addons --cluster-name  vietaws5
 5 - kubectl get csidriver ebs.csi.aws.com
 
 

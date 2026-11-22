@@ -14,8 +14,7 @@ curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-cont
 
 aws iam create-policy \
     --policy-name AWSLoadBalancerControllerIAMPolicy \
-    --policy-document file://iam_policy.json \
-    --profile eks
+    --policy-document file://iam_policy.json
 
 ```
 
@@ -29,11 +28,11 @@ eksctl create iamserviceaccount \
   --role-name AmazonEKSLoadBalancerControllerRole6 \
   --attach-policy-arn=arn:aws:iam::ACCOUNTID:policy/AWSLoadBalancerControllerIAMPolicy \
   --override-existing-serviceaccounts \
-  --approve --profile eks
+  --approve
 
 # verify
 # Get IAM Service Account
-eksctl  get iamserviceaccount --cluster vietvn --profile eks
+eksctl  get iamserviceaccount --cluster vietvn
 
 # Describe Service Account alb-ingress-controller
 kubectl describe sa aws-load-balancer-controller -n kube-system

@@ -1,10 +1,15 @@
-apiVersion: karpenter.sh/v1beta1
+# Render with: envsubst < np1.yaml | kubectl apply -f -   (needs AWS_REGION; zones a and b must exist in that region)
+apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
   name: np1
 spec:
   template:
     spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: team-a
       requirements:
         - key: karpenter.k8s.aws/instance-family
           operator: In
@@ -14,13 +19,13 @@ spec:
           values: ["nano", "micro"]
         - key: topology.kubernetes.io/zone
           operator: In
-          values: ["ap-southeast-1a", "ap-southeast-1b"]
+          values: ["${AWS_REGION}a", "${AWS_REGION}b"]
         - key: kubernetes.io/arch
           operator: In
-          values: ["amd64", "arm64"]
+          values: ["amd64"] # c5/m5/r5 are Intel; add arm64 only with Graviton families (c6g, m6g, ...)
         - key: karpenter.sh/capacity-type
           operator: In
           values: ["spot", "on-demand"]
-    limits:
-      cpu: 100
-      memory: 1000Gi
+  limits:
+    cpu: 100
+    memory: 1000Gi

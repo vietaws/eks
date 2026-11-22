@@ -1,0 +1,43 @@
+# Web app + internet-facing NLB. No AWS Load Balancer Controller is installed: Auto Mode provides it.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home
+  labels:
+    app: home
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: home
+  template:
+    metadata:
+      labels:
+        app: home
+    spec:
+      containers:
+        - name: home
+          image: vietaws/eks:home
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+spec:
+  type: LoadBalancer
+  loadBalancerClass: eks.amazonaws.com/nlb # default on Auto Mode, shown here to make the owner explicit
+  selector:
+    app: home
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP

@@ -1,0 +1,15 @@
+# TEMPLATE: values come from ../config.env. Scripts use the rendered copy in .rendered/manifests/.
+# AWS Load Balancer Controller on a NON-routable overlay.
+# The EKS control plane cannot reach pod IPs, so the controller (and its webhooks) must be hostNetwork.
+clusterName: ${CLUSTER_NAME}
+region: ${REGION}
+vpcId: VPC_ID # set by scripts/up.sh (--set vpcId=...)
+
+replicaCount: 1 # hostNetwork: one replica per node port set (9443 webhook, 8080 metrics, 61779 health)
+hostNetwork: true
+
+serviceAccount:
+  create: true
+  name: ${LBC_SERVICE_ACCOUNT} # bound to the IAM role by EKS Pod Identity (pod-identity.yaml)
+
+enableServiceMutatorWebhook: false

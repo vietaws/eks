@@ -1,5 +1,8 @@
 # Create EKS Cluster
 
+> 💡 For the newer demos (`22-karpenter`, `32-auto-mode`) use the shared scripts instead of the manual
+> commands below: `./scripts/up.sh` and `./scripts/down.sh` (see `README.md` in this folder).
+
 ## 1️⃣ - Create Amazon EKS Cluster
 
 - ☕️ It will take 10-15 minutes to create Amazon EKS Cluster Control plane. So, take a cup of coffee 😆
@@ -10,11 +13,10 @@ eksctl create cluster --name=vietvn \
                       --version 1.37 \
                       --region=ap-southeast-1 \
                       --zones=ap-southeast-1a,ap-southeast-1b \
-                      --without-nodegroup \
-                      --profile eks
+                      --without-nodegroup
 
 # Get List of clusters
-eksctl get cluster --profile eks
+eksctl get cluster
 
 # Create Cluster using manifest & eksctl
 eksctl create cluster -f 00-cluster.yaml
@@ -36,11 +38,10 @@ eksctl utils associate-iam-oidc-provider \
 eksctl utils associate-iam-oidc-provider \
     --region ap-southeast-1 \
     --cluster vietvn \
-    --approve \
-    --profile eks
+    --approve
 
 # check oidc on IAM - Identity provider or
-aws eks describe-cluster --name vietvn --profile eks --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5
+aws eks describe-cluster --name vietvn --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5
 
 ```
 
@@ -52,7 +53,7 @@ eksctl create cluster --name=vietvn \
                       #--zones=ap-southeast-1a,ap-southeast-1b \
                       --vpc-from-kops-cluster vpc-xxx \
                       --vpc-public-subnets=subnet-yyy,subnet-zzz  \
-                      --without-nodegroup --profile eks
+                      --without-nodegroup
 ```
 
 
@@ -74,8 +75,7 @@ eksctl create nodegroup --cluster=vietvn \
                        --external-dns-access \
                        --full-ecr-access \
                        --appmesh-access \
-                       --alb-ingress-access \
-                       --profile eks
+                       --alb-ingress-access
 
 # Create Private node group
 eksctl create nodegroup --cluster=vietvn \
@@ -91,15 +91,14 @@ eksctl create nodegroup --cluster=vietvn \
                         --full-ecr-access \
                         --appmesh-access \
                         --alb-ingress-access \
-                        --node-private-networking \
-                        --profile eks
+                        --node-private-networking
 # Get NodeGroups in a EKS Cluster
 eksctl get nodegroup --cluster=<Cluster-Name>
-eksctl get nodegroup --cluster=vietvn --profile eks
+eksctl get nodegroup --cluster=vietvn
 
 # Delete Node Group - Replace nodegroup name and cluster name
 eksctl delete nodegroup <NodeGroup-Name> --cluster <Cluster-Name>
-eksctl delete nodegroup vietvn-ng --cluster vietvn --profile eks
+eksctl delete nodegroup vietvn-ng --cluster vietvn
 
 # Create cluster & node group
 
@@ -115,14 +114,14 @@ eksctl create cluster --name=vietvn \
  --full-ecr-access \
  --appmesh-access \
  --asg-access \
- --external-dns-access --profile eks
+ --external-dns-access
 ```
 
 ## 3️⃣ - Delete
 
 ### List EKS Clusters
 
-eksctl get clusters --profile eks
+eksctl get clusters
 
 ### Capture Node Group name
 
@@ -134,10 +133,10 @@ eksctl get nodegroup --cluster=vietvn
 
 eksctl delete nodegroup --cluster=<clusterName> --name=<nodegroupName>
 
-eksctl delete nodegroup --cluster=vietvn --name=vietvn-ng2 --profile eks
+eksctl delete nodegroup --cluster=vietvn --name=vietvn-ng2
 
 ### Delete Cluster
 
 eksctl delete cluster <clusterName>
 
-eksctl delete cluster vietvn --profile eks
+eksctl delete cluster vietvn

@@ -7,8 +7,7 @@ curl -o iam-policy-example.json https://raw.githubusercontent.com/kubernetes-sig
 # Create IAM Policy
 aws iam create-policy \
     --policy-name AmazonEKS_EFS_CSI_Driver_Policy \
-    --policy-document file://iam-policy-example.json \
-    --profile eks
+    --policy-document file://iam-policy-example.json
 
 // Output
 {
@@ -27,7 +26,7 @@ aws iam create-policy \
 }
 
 # Find OIDC for cluster
-aws eks describe-cluster --name vietaws6 --query "cluster.identity.oidc.issuer" --output text --profile eks
+aws eks describe-cluster --name vietaws6 --query "cluster.identity.oidc.issuer" --output text
 
 // Output: https://oidc.eks.ap-southeast-1.amazonaws.com/id/OIDC_ID
 
@@ -59,8 +58,7 @@ EOF
 # Create IAM Role
 aws iam create-role \
   --role-name AmazonEKS_EFS_CSI_DriverRole6 \
-  --assume-role-policy-document file://"trust-policy.json" \
-  --profile eks
+  --assume-role-policy-document file://"trust-policy.json"
 
 # Verify on IAM Console - User
 🌈 For each cluster, you have to re-create AmazonEKS_EFS_CSI_DriverRole because of OIDC
@@ -68,8 +66,7 @@ aws iam create-role \
 # Attach IAM Policy to EFS IAM Role
 aws iam attach-role-policy \
   --policy-arn arn:aws:iam::ACCOUNT_ID:policy/AmazonEKS_EFS_CSI_Driver_Policy \
-  --role-name AmazonEKS_EFS_CSI_DriverRole6 \
-  --profile eks
+  --role-name AmazonEKS_EFS_CSI_DriverRole6
 // Verify on AWS Console
 
 # Download efs csi driver
@@ -103,7 +100,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-efs-csi-d
 # Check file size EFS
 
 aws efs describe-file-systems \
-    --file-system-id fs-0f5eecb0ee13c850b --profile eks
+    --file-system-id fs-0f5eecb0ee13c850b
 
 kubectl exec -it pods/efs-app -- sh
 

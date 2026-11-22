@@ -8,10 +8,9 @@
 # Command
 eksctl create fargateprofile --cluster vietaws5 \
                              --name fg-efs \
-                             --namespace demo \
-                             --profile eks
+                             --namespace demo
 
-eksctl get fargateprofile --cluster vietaws5 --profile eks
+eksctl get fargateprofile --cluster vietaws5
 // Output
 
 NAME	SELECTOR_NAMESPACE	SELECTOR_LABELS	POD_EXECUTION_ROLE_ARN			SUBNETS							TAGS	STATUS
@@ -60,12 +59,12 @@ from Fargate Deployment. Hostname: home-deployment-6cdb6798bf-vg2ml
 kubectl delete -f manifests
 
 # Delete Fargate profile
-eksctl delete fargateprofile --cluster vietaws5 --name fg-efs --profile eks
+eksctl delete fargateprofile --cluster vietaws5 --name fg-efs
 
 # verify
 kubectl get pods -n demo
 
 kubectl get ns
 
-eksctl get fargateprofile --cluster vietaws5 --profile eks
+eksctl get fargateprofile --cluster vietaws5
 ```

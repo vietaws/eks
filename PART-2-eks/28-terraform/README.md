@@ -26,7 +26,7 @@ terraform plan
 terraform apply
 
 # Connect
-aws eks update-kubeconfig --alias tf --name eks-tf --region ap-southeast-1 --profile eks
+aws eks update-kubeconfig --alias tf --name eks-tf --region ap-southeast-1
 kubectl get nodes
 ```
 

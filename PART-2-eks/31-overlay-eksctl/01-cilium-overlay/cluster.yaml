@@ -1,0 +1,45 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/cluster.yaml
+#
+# eksctl config for the Cilium overlay demo (replica of 30-no-vpc-ip-pods/01-cilium-overlay).
+# Public subnets for the nodes, public node IPs, NO NAT gateway. Cilium (not the VPC CNI) provides pod networking.
+#
+# eksctl refuses node groups and Pod Identity associations in the same file as a cluster that has no
+# VPC CNI, so the setup is split into three files, applied in this order (scripts/up.sh does it for you):
+#   1. cluster.yaml          eksctl create cluster
+#   2. (helm install cilium: nodes need a CNI to become Ready)
+#   3. pod-identity.yaml     eksctl create podidentityassociation
+#   4. nodegroup.yaml        eksctl create nodegroup
+#   5. eksctl create addon --name coredns
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+# eksctl creates the VPC and splits its CIDR itself (vpc.subnets is only for IMPORTING existing
+# subnets, so explicit CIDRs fail with "can't describe subnet by CIDR without VPC ID").
+availabilityZones: ["${AZ_1}", "${AZ_2}"]
+
+vpc:
+  # With 2 AZs eksctl splits the VPC CIDR into 8 equal blocks (a /24 gives 8 x /27, 27 usable IPs each):
+  #   block 0-1  public, one per AZ   -> nodes (public IPs) and the ALB
+  #   block 2-3  private, one per AZ  -> no NAT, no nodes; EKS may place control-plane ENIs here
+  #   block 4-7  left free
+  cidr: ${VPC_CIDR}
+  nat:
+    gateway: Disable # no NAT gateway: nodes use public IPs
+
+# Must not overlap the VPC CIDR or the Cilium pod CIDR (checked by scripts/up.sh).
+kubernetesNetworkConfig:
+  serviceIPv4CIDR: ${SERVICE_CIDR}
+
+# Do NOT install vpc-cni / kube-proxy / coredns automatically: Cilium replaces the VPC CNI.
+addonsConfig:
+  disableDefaultAddons: true
+
+# DaemonSet add-ons become ACTIVE with 0 nodes. CoreDNS (a Deployment) is added after the nodes exist.
+addons:
+  - name: kube-proxy
+  - name: eks-pod-identity-agent

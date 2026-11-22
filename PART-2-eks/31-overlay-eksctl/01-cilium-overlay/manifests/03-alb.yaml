@@ -1,0 +1,28 @@
+# TEMPLATE: values come from ../config.env. Scripts use the rendered copy in .rendered/manifests/.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${INGRESS_NAME}
+  labels:
+    app: app
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: ${ALB_NAME}
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    # REQUIRED on the Cilium overlay: pod IPs are unreachable from the ALB, so target the node's NodePort.
+    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "5"
+spec:
+  ingressClassName: aws-ingress-class
+  defaultBackend:
+    service:
+      name: app-svc
+      port:
+        number: 8080

@@ -2,19 +2,19 @@
 
 ```
 # Get VPC ID
-aws eks describe-cluster --name vietaws6 --query "cluster.resourcesVpcConfig.vpcId" --output text --profile eks
+aws eks describe-cluster --name vietaws6 --query "cluster.resourcesVpcConfig.vpcId" --output text
 // vpc-048d412f4093ee6b6
 
 # Get VPC CIDR
-aws ec2 describe-vpcs --vpc-ids vpc-048d412f4093ee6b6 --query "Vpcs[].CidrBlock" --output text --profile eks
+aws ec2 describe-vpcs --vpc-ids vpc-048d412f4093ee6b6 --query "Vpcs[].CidrBlock" --output text
 // 192.168.0.0/16
 
 # Create Security Group
-aws ec2 create-security-group --description efs-demo-vietaws-sg --group-name efs-sg --vpc-id vpc-048d412f4093ee6b6 --profile eks
+aws ec2 create-security-group --description efs-demo-vietaws-sg --group-name efs-sg --vpc-id vpc-048d412f4093ee6b6
 // security group id: sg-07279a8c9186a7cc8
 
 # Add EFS Rule
-aws ec2 authorize-security-group-ingress --group-id sg-0306c8d2a3f105795 --protocol tcp --port 2049 --cidr 192.168.0.0/16 --profile eks
+aws ec2 authorize-security-group-ingress --group-id sg-0306c8d2a3f105795 --protocol tcp --port 2049 --cidr 192.168.0.0/16
 // Success
 
 ```
@@ -110,7 +110,7 @@ Ref 📗: https://aws.amazon.com/blogs/storage/persistent-storage-for-kubernetes
 # Check file size EFS
 
 aws efs describe-file-systems \
-    --file-system-id fs-0f5eecb0ee13c850b --profile eks
+    --file-system-id fs-0f5eecb0ee13c850b
 
 ```
 

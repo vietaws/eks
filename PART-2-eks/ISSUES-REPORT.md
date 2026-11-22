@@ -82,3 +82,23 @@ up to **1.37**; Amazon Linux 2 (AL2) EKS AMIs reached **end-of-support 2025-11-2
   guidance, consistent cleanup/cost sections.
 - **Correctness fixes**: macOS eksctl platform, IAM policy guidance, metrics-server
   install.
+
+---
+
+## 🔁 Update 2026-11-22: EKS 1.37, Karpenter 1.15.3, Auto Mode
+
+Verified against the EKS User Guide, the Karpenter docs and the `karpenter-crd` 1.15.3 chart. Not run on a live AWS account.
+
+| # | Location | Issue | Fix applied |
+|---|----------|-------|-------------|
+| N1 | `22-karpenter/01-configure/04-install.md` | Pinned `K8S_VERSION=1.31`, `KARPENTER_VERSION=1.x.y`, and attached one `KarpenterControllerPolicy-<cluster>`. The 1.15.3 CloudFormation template creates **six** policies instead, so the old command fails. | Install moved to `22-karpenter/scripts/install-karpenter.sh`, pinned to 1.15.3, attaching the six policies. |
+| N2 | `22-karpenter/01-configure/02-components.md`, `examples/*` | `v1beta1` API. `np1.yaml` also asked for `arm64` with Intel-only `c5/m5/r5` families. | Converted to `v1`, `nodeClassRef` with `group`/`kind`/`name`, arm64 removed from `np1`. |
+| N3 | `22-karpenter/02-implement` | `nodeclass.yaml` was a shell snippet with a `.yaml` extension and `manifests/ec2nodeclass.yaml` was empty. | Real manifests in `02-implement/manifests/` (`ec2nodeclass.yaml`, `nodepool.yaml`), validated against the CRD schema. |
+| N4 | `22-karpenter/05-expired` | `v1beta1`, `expireAfter` under `disruption`, `14d` duration (days are not accepted, only `s`, `m`, `h`). | Rewritten for `v1` with `terminationGracePeriod`. |
+| N5 | `22-karpenter/06-expired` | Held a 1.29 → 1.30 upgrade walkthrough on AL2. | Renamed `06-upgrade`, rewritten for 1.36 → 1.37, then folded into `33-cluster-upgrade` (see N9). |
+| N6 | `02-create-eks-cluster` | No scripted create/delete, so each demo repeated cluster steps. | Added `cluster.yaml`, `cluster-auto.yaml`, `scripts/up.sh`, `scripts/down.sh`. |
+| N7 | Tooling | Karpenter 1.15 guide requires `eksctl` ≥ 0.230.0. The author machine has 0.229.0-dev. | `up.sh` warns when eksctl is older. |
+| N8 | `32-auto-mode` | Suggested new demo "EKS Auto Mode" (list above). | Added `32-auto-mode` with two sub-demos (capabilities, vs Karpenter). |
+| N9 | `22-karpenter/06-upgrade`, `32-auto-mode/03-upgrade` | The cluster upgrade was written twice. Drift-on-upgrade, pinned AMI alias, who-upgrades-what and rollback were repeated in three places, the managed node group upgrade was never measured, and the two runs used different clusters and load balancer types. | Both removed. One runbook, `33-cluster-upgrade`: three clusters in parallel (managed node group, Karpenter, Auto Mode), same IP-target NLB, preflight, probe, cluster watcher, load test and cost script. |
+| N10 | `22-karpenter/06-upgrade` (removed) | Claimed a pinned AMI alias does not drift on a control plane upgrade. A pinned alias is resolved per Kubernetes version, so the alias must be moved to a release that exists for the new version. | `33-cluster-upgrade` step 4 promotes the alias explicitly (`scripts/ami-release.sh`). Verify against a live cluster. |
+| N11 | `02-create-eks-cluster` | Node group size and type were fixed (2 × `t3.medium`). | `up.sh` accepts `NODE_TYPE`, `NODE_COUNT`, `NODE_MAX` (defaults unchanged). |

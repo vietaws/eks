@@ -18,7 +18,7 @@ i3.4xlarge → mdadm RAID-0 over 2 NVMe disks → /dev/md0 → one big PV
 ## 🚀 Steps
 ```bash
 # Pre-bootstrap script installs mdadm, creates /dev/md0, formats + mounts it
-eksctl create nodegroup -f ng.yaml --profile eks
+eksctl create nodegroup -f ng.yaml
 kubectl apply -f manifests
 ```
 
@@ -34,7 +34,7 @@ kubectl get pv            # a single PV sized to the sum of all striped disks
 ```bash
 kubectl delete -f manifests
 kubectl delete pv --all
-eksctl delete nodegroup --cluster eksdemo --name eks-pv-raid-ng --profile eks
+eksctl delete nodegroup --cluster eksdemo --name eks-pv-raid-ng
 ```
 
 ## 📝 Notes & cost

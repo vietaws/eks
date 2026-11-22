@@ -1,0 +1,20 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/nodegroup-s0.yaml
+#
+# Stage 0: stock VPC CNI. kubelet keeps the EKS default maxPods (ENI formula, 17 on t3.medium).
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+managedNodeGroups:
+  - name: ${NODEGROUP_PREFIX}0
+    instanceType: ${INSTANCE_TYPE}
+    desiredCapacity: ${NODE_DESIRED}
+    minSize: ${NODE_MIN}
+    maxSize: ${NODE_MAX}
+    amiFamily: AmazonLinux2023
+    privateNetworking: false # public subnets + public IPs, no NAT gateway
+    volumeSize: ${NODE_VOLUME_SIZE}

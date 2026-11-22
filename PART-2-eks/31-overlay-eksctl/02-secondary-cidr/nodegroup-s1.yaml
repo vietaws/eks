@@ -1,0 +1,21 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/nodegroup-s1.yaml
+#
+# Stage 1: custom networking (pods in the secondary CIDR). maxPods must be set explicitly, otherwise kubelet keeps 17 and over-commits.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+managedNodeGroups:
+  - name: ${NODEGROUP_PREFIX}1
+    instanceType: ${INSTANCE_TYPE}
+    desiredCapacity: ${NODE_DESIRED}
+    minSize: ${NODE_MIN}
+    maxSize: ${NODE_MAX}
+    amiFamily: AmazonLinux2023
+    privateNetworking: false # public subnets + public IPs, no NAT gateway
+    volumeSize: ${NODE_VOLUME_SIZE}
+    maxPodsPerNode: ${MAX_PODS_STAGE1} # custom networking removes the primary ENI from pod use

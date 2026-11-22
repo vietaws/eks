@@ -1,0 +1,33 @@
+# TEMPLATE: values come from config.env. Use the rendered copy: .rendered/nodegroup.yaml
+#
+# Managed node group for the Cilium overlay demo. Create it AFTER Cilium is installed.
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "${K8S_VERSION}"
+
+managedNodeGroups:
+  - name: ${NODEGROUP_NAME}
+    instanceType: ${INSTANCE_TYPE}
+    desiredCapacity: ${NODE_DESIRED}
+    minSize: ${NODE_MIN}
+    maxSize: ${NODE_MAX}
+    amiFamily: AmazonLinux2023
+    privateNetworking: false # public subnets + public IPs
+    volumeSize: ${NODE_VOLUME_SIZE}
+    # Overlay CNI: the ENI/IP limit no longer applies, so kubelet maxPods is the cap.
+    maxPodsPerNode: ${MAX_PODS}
+    # Keep app pods off a node until Cilium is ready. Cilium removes this taint itself.
+    taints:
+      - key: node.cilium.io/agent-not-ready
+        value: "true"
+        effect: NoExecute
+    iam:
+      # AmazonEKS_CNI_Policy is intentionally NOT attached: Cilium overlay never calls the EC2 API for ENIs/IPs.
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore # optional: shell access through SSM

@@ -1,57 +1,77 @@
-# Benefits
+# 22.05 — Karpenter Node Expiry (`expireAfter`)
 
-- Expire nodes after certain amount of time
+## 🎯 Scenario
+Give every node a **maximum lifetime**. When it is reached, Karpenter replaces the node with a fresh one.
+This forces AMI refreshes and recycles nodes for security hygiene.
 
-- Force AMI refresh
+> ✅ In API `karpenter.sh/v1`, `expireAfter` lives under `spec.template.spec`. It used to sit under
+> `spec.disruption` in `v1beta1`, and `consolidationPolicy: WhenUnderutilized` was renamed
+> `WhenEmptyOrUnderutilized`.
 
-- Recycle node for security concerns
-
-- Using `tain` to prevent pods `karpenter.sh/disruption:NoSchedule`
-
-- Time configure Options:
-  - 720h (720 hours)
-  - 14d (14 days)
-
-# Create nodepool & nodeclass
-
+## 🗺 Architecture
 ```
-# Example 1
-apiVersion: karpenter.sh/v1beta1
-kind: NodePool
-metadata:
-  name: default
-spec:
-  template:
-    spec:
-    #instance type...
-  disruption:
-    consolidationPolicy: WhenUnderutilized # WhenEmpty
-    expireAfter: 720h # 30 * 24h = 720h
-
-# Example 2
-apiVersion: karpenter.sh/v1beta1
-kind: NodePool
-metadata:
-  name: default
-spec:
-  template:
-    spec:
-    #instance type...
-  disruption:
-    consolidationPolicy: WhenUnderutilized # WhenEmpty
-    expireAfter: Never
-
-# Example 3
-apiVersion: karpenter.sh/v1beta1
-kind: NodePool
-metadata:
-  name: default
-spec:
-  template:
-    spec:
-    #instance type...
-  disruption:
-    consolidationPolicy: WhenUnderutilized # WhenEmpty
-    expireAfter: 360h
-    consolidateAfter: 30s
+node launched ── ... ── expireAfter reached ──► replacement launched ──► old node drained ──► terminated
+                                                (budgets and PDBs apply until terminationGracePeriod)
 ```
+
+## ✅ Prerequisites
+- Karpenter, EC2NodeClass and NodePool from `../02-implement`.
+
+## Configuration options
+```yaml
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    spec:
+      expireAfter: 720h           # 30 days. Only s, m, h units are accepted (no "d"); default is 720h
+      terminationGracePeriod: 48h # hard limit: after this, pods are force-deleted even if a PDB or do-not-disrupt blocks
+      # expireAfter: Never        # nodes never expire
+```
+| Setting | Meaning |
+|---------|---------|
+| `expireAfter: 720h` | Node is replaced after 30 days (default) |
+| `expireAfter: 360h` | Replace after 15 days (stricter patching policy) |
+| `expireAfter: Never` | Disable expiry (rely on drift for AMI updates) |
+| `terminationGracePeriod` | Upper bound on draining. Without it, a PDB with `maxUnavailable: 0` or a `do-not-disrupt` pod can block an expired node forever |
+
+> `expireAfter` is an **upper bound**, not a guarantee. A node can be consolidated or drifted earlier.
+> Expiry is a forceful method: budgets slow it down but do not cancel it once the grace period ends.
+
+## 🚀 Steps (short lifetime to see it happen)
+```bash
+kubectl apply -f manifests/app.yaml
+kubectl scale deployment inflate --replicas 2
+kubectl get nodeclaims -w                       # wait for nodes, note their age
+
+# Lower the lifetime to 15 minutes. Changing expireAfter drifts the existing nodes once (they keep the old value)
+kubectl patch nodepool default --type merge \
+  -p '{"spec":{"template":{"spec":{"expireAfter":"15m","terminationGracePeriod":"5m"}}}}'
+
+# ~15 minutes after the replacement nodes start, they are replaced again
+kubectl get nodeclaims -o custom-columns=NAME:.metadata.name,CREATED:.metadata.creationTimestamp
+kubectl logs -f -n kube-system -l app.kubernetes.io/name=karpenter -c controller | grep -iE 'expire|disrupt'
+```
+
+### Keep workloads off a node that is about to go
+Karpenter taints a node being disrupted with `karpenter.sh/disrupted:NoSchedule`, so no new pods land on it.
+
+## 🔍 Validation
+```bash
+kubectl describe nodeclaim <name> | grep -iE 'expire|Expired|Drifted'
+```
+Expected: the NodeClaim shows an `Expired` condition, a replacement appears, then the old node is removed.
+
+## 🧹 Cleanup
+```bash
+kubectl delete deployment inflate
+kubectl patch nodepool default --type merge \
+  -p '{"spec":{"template":{"spec":{"expireAfter":"720h"}}}}'    # restore the default
+```
+
+## 📝 Notes
+- Expiry plus `al2023@latest` is the simplest rolling patch process. For production, pin the AMI alias,
+  promote it through environments, and keep `expireAfter` as the safety net.
+- The Kubernetes control plane upgrade path is in `../../33-cluster-upgrade`.

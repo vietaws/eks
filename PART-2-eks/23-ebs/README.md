@@ -24,7 +24,7 @@ Use the **Amazon EBS CSI driver** to dynamically provision block storage (`Persi
 ```bash
 # Install the driver as a managed add-on (recommended)
 aws eks create-addon --cluster-name eksdemo --addon-name aws-ebs-csi-driver \
-  --service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EBS_CSI_DriverRole --profile eks
+  --service-account-role-arn arn:aws:iam::ACCOUNT_ID:role/AmazonEKS_EBS_CSI_DriverRole
 
 # Then work through 01-basics → 09-static-provisioning
 kubectl apply -f 01-basics/manifests
