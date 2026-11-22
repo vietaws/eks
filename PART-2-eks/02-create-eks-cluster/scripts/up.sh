@@ -81,13 +81,27 @@ if eksctl get cluster --name "$CLUSTER_NAME" --region "$AWS_REGION" >/dev/null 2
   exit 1
 fi
 
+# eksctl picks the AMI architecture from a built-in instance type list that does not know t9g (Graviton5),
+# so it falls back to AL2023_x86_64_STANDARD and EKS rejects the type. For Graviton types (t4g, m7g, t9g, ...)
+# resolve the arm64 AL2023 AMI from SSM and pass it as a custom AMI (eksctl then generates the nodeadm user data).
+NODE_AMI_LINE=""
+if [ "$MODE" = standard ] && [[ "$NODE_TYPE" =~ ^[a-z]+[0-9]+g[a-z]*\. ]]; then
+  SSM_PARAM="/aws/service/eks/optimized-ami/${K8S_VERSION}/amazon-linux-2023/arm64/standard/recommended/image_id"
+  NODE_AMI="$(aws ssm get-parameter --name "$SSM_PARAM" --region "$AWS_REGION" --query Parameter.Value --output text)" ||
+    { echo "Could not read $SSM_PARAM (is $K8S_VERSION available in $AWS_REGION?)" >&2; exit 1; }
+  [[ "$NODE_AMI" =~ ^ami-[0-9a-f]+$ ]] || { echo "Unexpected AMI id '$NODE_AMI'" >&2; exit 1; }
+  echo "Graviton node type $NODE_TYPE: using arm64 AL2023 AMI $NODE_AMI"
+  NODE_AMI_LINE="ami: $NODE_AMI"
+fi
+
 echo "==> 1/3 Create the cluster (control plane + VPC$([ "$MODE" = standard ] && echo " + public node group"))"
 sed -e "s|\${CLUSTER_NAME}|${CLUSTER_NAME}|g" \
     -e "s|\${AWS_REGION}|${AWS_REGION}|g" \
     -e "s|\${K8S_VERSION}|${K8S_VERSION}|g" \
     -e "s|\${NODE_TYPE}|${NODE_TYPE}|g" \
     -e "s|\${NODE_COUNT}|${NODE_COUNT}|g" \
-    -e "s|\${NODE_MAX}|${NODE_MAX}|g" "$CONFIG" |
+    -e "s|\${NODE_MAX}|${NODE_MAX}|g" \
+    -e "s|\${NODE_AMI_LINE}|${NODE_AMI_LINE}|g" "$CONFIG" |
   eksctl create cluster -f -
 
 echo "==> 2/3 Write kubeconfig"

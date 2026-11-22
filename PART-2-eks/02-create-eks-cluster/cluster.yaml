@@ -1,6 +1,8 @@
 # Shared demo cluster, MODE=standard. Rendered by scripts/up.sh (the ${...} tokens are replaced with sed).
 # Used by: 22-karpenter, 33-cluster-upgrade (managed node group and Karpenter clusters), and any demo that needs a plain cluster.
 # NODE_TYPE, NODE_COUNT and NODE_MAX come from up.sh (defaults t9g.medium, 2, 4).
+# NODE_AMI_LINE is empty for x86 types. For Graviton types up.sh sets "ami: <arm64 AL2023 AMI id>" because eksctl
+# does not know t9g and would otherwise request the x86_64 AMI type.
 #
 #  - IAM OIDC provider enabled (IRSA) + EKS Pod Identity agent add-on (Pod Identity)
 #  - one PUBLIC managed node group (nodes get public IPs, no NAT needed for node traffic)
@@ -26,6 +28,7 @@ managedNodeGroups:
   - name: ${CLUSTER_NAME}-ng
     instanceType: ${NODE_TYPE}
     amiFamily: AmazonLinux2023
+    ${NODE_AMI_LINE}
     desiredCapacity: ${NODE_COUNT}
     minSize: ${NODE_COUNT}
     maxSize: ${NODE_MAX}
