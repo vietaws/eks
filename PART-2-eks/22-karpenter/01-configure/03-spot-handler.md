@@ -2,8 +2,7 @@
 
 ## Why Spot
 Spot instances cost up to about 90% less than On-Demand, but EC2 can take them back with a **2-minute warning**.
-Karpenter makes Spot practical for stateless workloads: it launches from many instance types at once and
-replaces an interrupted node before it disappears.
+Karpenter makes Spot practical for stateless workloads: it launches from many instance types at once and replaces an interrupted node before it disappears.
 
 ## How interruption handling works
 ```

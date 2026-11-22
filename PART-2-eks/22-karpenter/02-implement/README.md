@@ -1,11 +1,8 @@
 # 22.02 — Implement Karpenter (NodePool + EC2NodeClass)
 
 ## 🎯 Scenario
-Create a Karpenter **EC2NodeClass** and **NodePool**, then watch Karpenter launch right-sized
-nodes directly through the EC2 API when pods go pending.
+Create a Karpenter **EC2NodeClass** and **NodePool**, then watch Karpenter launch right-sized nodes directly through the EC2 API when pods go pending.
 
-> ✅ Uses the stable **`karpenter.sh/v1`** and **`karpenter.k8s.aws/v1`** APIs (Karpenter 1.x) and the
-> **AL2023** AMI family. The `v1beta1` API and the `AL2` family are deprecated.
 
 ## 🗺 Architecture
 ```

@@ -26,11 +26,30 @@ spec:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
         name: default
-      expireAfter: 720h # 30 days; v1 moved this from `disruption` to the template spec
+      expireAfter: 336h # 14 days;
   limits:
     cpu: 100 # hard cap on the total vCPU this NodePool may launch (protects a demo account)
   disruption:
-    consolidationPolicy: WhenEmptyOrUnderutilized # v1 name (was WhenUnderutilized)
-    consolidateAfter: 1m
+    consolidationPolicy: WhenEmptyOrUnderutilized # Karpenter shrinking the cluster to cut costs when nodes are underutilized or empty (no pods).  Other options: Never, WhenEmpty
+
+
+  # Note: Karpenter will not consolidate nodes that are running pods with the following characteristics:
+  #   - Pods with local storage (emptyDir, hostPath, etc.)
+  #   - Pods with a PodDisruptionBudget (PDB) that would be violated by evicting the pod
+  #   - Pods that are not managed by a controller (e.g. Deployment, StatefulSet, etc.)
+  #   - Pods that have been recently created or updated (default: 5 minutes)
+
+  #  Karpenter launches the replacement node first for "replace" consolidation, but it does not pin the old pods onto it. The order for a node being replaced is:
+  
+  # 1. Decide: Karpenter simulates whether the node's pods fit on free capacity elsewhere (delete) or need a cheaper node (replace).
+  # 2. Launch the replacement (replace only): It creates the new node and waits until it is registered and ready. For a plain delete, no new node is created.
+  # 3. Taint the old node: It adds karpenter.sh/disrupted:NoSchedule, so no new pods land on the old node.
+  # 4. Evict the pods: Eviction respects PodDisruptionBudgets (PDBs). A PDB can pause it until enough other replicas are ready.
+  # 5. Reschedule the pods: The pod's controller (Deployment or ReplicaSet) creates new pods, and the Kubernetes scheduler places them. They usually land on the new node or on other free capacity, but Karpenter does not choose.
+  # 6. Terminate the old instance: This happens once it is drained.
+
+
+
+    consolidateAfter: 1m # node must stay unchanged for one minute before Karpenter treats it as a candidate for consolidation
     budgets:
-      - nodes: "10%" # at most 10% of this pool's nodes disrupted at once (the v1 default)
+      - nodes: "10%" #  how many nodes can be disrupted at once.

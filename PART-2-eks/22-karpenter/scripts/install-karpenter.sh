@@ -4,12 +4,12 @@
 #   CloudFormation (node role, controller policies, SQS interruption queue) -> Spot service-linked role
 #   -> Pod Identity association -> node role access -> Helm chart.
 #
-# Usage: [CLUSTER_NAME=..] [AWS_REGION=..] [KARPENTER_VERSION=..] ./scripts/install-karpenter.sh [aws-profile]
+# Usage: ./scripts/install-karpenter.sh [--cluster-name=NAME] [--region=REGION] [--karpenter-version=X.Y.Z]
+#                                        [--namespace=NS] [--profile=AWS_PROFILE]
+# Use the same --cluster-name and --region you gave to 02-create-eks-cluster/scripts/up.sh.
+# Every option also accepts the "--option VALUE" form and falls back to an environment variable
+# (CLUSTER_NAME, AWS_REGION, KARPENTER_VERSION, KARPENTER_NAMESPACE), then to the default.
 set -euo pipefail
-
-if [ -n "${1:-}" ]; then
-  export AWS_PROFILE="$1"
-fi
 
 CLUSTER_NAME="${CLUSTER_NAME:-eksdemo}"
 AWS_REGION="${AWS_REGION:-ap-southeast-1}"
@@ -17,10 +17,29 @@ KARPENTER_VERSION="${KARPENTER_VERSION:-1.15.3}" # compatibility: Karpenter 1.15
 KARPENTER_NAMESPACE="${KARPENTER_NAMESPACE:-kube-system}"
 AWS_PARTITION="${AWS_PARTITION:-aws}"
 
+while [ $# -gt 0 ]; do
+  opt="$1"; val=""
+  case "$opt" in
+    -h|--help) sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --*=*) val="${opt#*=}"; opt="${opt%%=*}"; shift ;;
+    --*) [ $# -ge 2 ] || { echo "option $opt needs a value" >&2; exit 1; }; val="$2"; shift 2 ;;
+    *) echo "unexpected argument '$opt' (use --help)" >&2; exit 1 ;;
+  esac
+  case "$opt" in
+    --cluster-name) CLUSTER_NAME="$val" ;;
+    --region) AWS_REGION="$val" ;;
+    --karpenter-version) KARPENTER_VERSION="$val" ;;
+    --namespace) KARPENTER_NAMESPACE="$val" ;;
+    --profile) export AWS_PROFILE="$val" ;;
+    *) echo "unknown option '$opt' (use --help)" >&2; exit 1 ;;
+  esac
+done
+
+[[ "$AWS_REGION" =~ ^[a-z]{2}(-[a-z]+)+-[0-9]$ ]] || { echo "AWS_REGION '$AWS_REGION' is not valid" >&2; exit 1; }
 [[ "$CLUSTER_NAME" =~ ^[A-Za-z][-A-Za-z0-9]{0,99}$ ]] || { echo "CLUSTER_NAME '$CLUSTER_NAME' is not valid" >&2; exit 1; }
 [[ "$KARPENTER_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "KARPENTER_VERSION '$KARPENTER_VERSION' must look like 1.15.3" >&2; exit 1; }
 
-for tool in aws eksctl kubectl helm curl; do
+for tool in aws eksctl kubectl helm curl jq; do
   command -v "$tool" >/dev/null || { echo "missing tool: $tool" >&2; exit 1; }
 done
 
@@ -50,13 +69,16 @@ aws iam create-service-linked-role --aws-service-name spot.amazonaws.com 2>/dev/
 echo "==> 3/5 Pod Identity association for the karpenter service account"
 POLICY_PREFIX="arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:policy/KarpenterController"
 POLICIES=""
+ASSOCIATION_CREATED=0
 for p in NodeLifecycle IAMIntegration EKSIntegration Interruption ResourceDiscovery ZonalShift; do
   POLICIES="${POLICIES:+$POLICIES,}${POLICY_PREFIX}${p}Policy-${CLUSTER_NAME}"
 done
+# "eksctl get podidentityassociation" exits 0 even when nothing is found, so count the returned associations.
 if eksctl get podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
-    --namespace "$KARPENTER_NAMESPACE" --service-account-name karpenter >/dev/null 2>&1; then
+    --namespace "$KARPENTER_NAMESPACE" --service-account-name karpenter -o json 2>/dev/null | jq -e 'length > 0' >/dev/null; then
   echo "    already exists, skipping"
 else
+  ASSOCIATION_CREATED=1
   eksctl create podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
     --namespace "$KARPENTER_NAMESPACE" --service-account-name karpenter \
     --role-name "${CLUSTER_NAME}-karpenter" \
@@ -74,6 +96,13 @@ else
     --group system:bootstrappers --group system:nodes
 fi
 
+# Pod Identity credentials are injected only when a pod starts. If Karpenter pods from an earlier, failed run
+# exist (CrashLoopBackOff with a 403 from EC2), restart them so they pick up the association created above.
+if [ "$ASSOCIATION_CREATED" = 1 ] && kubectl get deployment karpenter -n "$KARPENTER_NAMESPACE" >/dev/null 2>&1; then
+  echo "    association was missing: restarting the existing karpenter pods"
+  kubectl rollout restart deployment/karpenter -n "$KARPENTER_NAMESPACE"
+fi
+
 echo "==> 5/5 Helm install Karpenter ${KARPENTER_VERSION}"
 helm registry logout public.ecr.aws >/dev/null 2>&1 || true
 helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
@@ -85,7 +114,13 @@ helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter \
   --set controller.resources.requests.memory=1Gi \
   --set controller.resources.limits.cpu=1 \
   --set controller.resources.limits.memory=1Gi \
-  --wait
+  --wait || {
+    echo "Karpenter did not become ready. Controller log:" >&2
+    kubectl logs -n "$KARPENTER_NAMESPACE" -l app.kubernetes.io/name=karpenter -c controller --tail=15 >&2 || true
+    echo "A 403 from EC2 means the Pod Identity association is missing or the pods started before it existed:" >&2
+    echo "  eksctl get podidentityassociation --cluster $CLUSTER_NAME --region $AWS_REGION" >&2
+    exit 1
+  }
 
 kubectl get pods -n "$KARPENTER_NAMESPACE" -l app.kubernetes.io/name=karpenter
 echo

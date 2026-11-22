@@ -13,13 +13,13 @@ the `karpenter.sh/discovery` tag on subnets and security groups, and a public ma
 that hosts the Karpenter controller. Nothing here repeats that.
 
 ```bash
-export AWS_REGION=ap-southeast-1 CLUSTER_NAME=eksdemo
-(cd ../02-create-eks-cluster && ./scripts/up.sh --mode=standard)    # about 15-20 min
+(cd ../02-create-eks-cluster && ./scripts/up.sh --mode=standard --cluster-name=eksdemo --region=ap-southeast-1)   # about 15-20 min
+export CLUSTER_NAME=eksdemo AWS_REGION=ap-southeast-1    # used by the manual commands and envsubst below
 ```
 
 ## 2 — Install Karpenter (script)
 ```bash
-./scripts/install-karpenter.sh        # from 22-karpenter/, about 5 min
+./scripts/install-karpenter.sh --cluster-name=eksdemo --region=ap-southeast-1   # from 22-karpenter/, about 5 min
 ```
 
 What the script does, in order:
@@ -32,10 +32,8 @@ What the script does, in order:
 | 4 | `eksctl create iamidentitymapping` for the node role | Lets Karpenter-launched nodes join the cluster |
 | 5 | `helm upgrade --install karpenter oci://public.ecr.aws/karpenter/karpenter` | Installs the controller and CRDs |
 
-> ⚠️ The old single `KarpenterControllerPolicy-<cluster>` policy used by earlier versions of this
-> demo no longer exists in the 1.15 template. Attaching it fails with `NoSuchEntity`.
 
-### Manual equivalent (to teach each step)
+### Manual equivalent
 ```bash
 export KARPENTER_NAMESPACE="kube-system"
 export KARPENTER_VERSION="1.15.3"
@@ -81,15 +79,12 @@ kubectl get crd | grep -E 'karpenter'                                   # nodepo
 ```
 
 ## ⬆️ Upgrading Karpenter later
-Karpenter is **not** tied to the cluster's Kubernetes version the way Cluster Autoscaler is, but each
-minor supports a fixed range of Kubernetes versions. Before you upgrade the cluster, check the
-[compatibility matrix](https://karpenter.sh/docs/upgrading/compatibility/), upgrade Karpenter first if
-needed, and re-run `helm upgrade --install` with the new `KARPENTER_VERSION`. Regular releases are supported
+Karpenter is **not** tied to the cluster's Kubernetes version the way Cluster Autoscaler is, but each minor supports a fixed range of Kubernetes versions. Before you upgrade the cluster, check the
+[compatibility matrix](https://karpenter.sh/docs/upgrading/compatibility/), upgrade Karpenter first if needed, and re-run `helm upgrade --install` with the new `KARPENTER_VERSION`. Regular releases are supported
 only until the next minor is published. For fewer upgrades pick an LTS release (see the same page).
 
 ## ✅ Conclusion
-- Karpenter is a normal Deployment plus AWS plumbing: a node role, six controller policies, an SQS interruption queue,
-  EventBridge rules and one Pod Identity association. Nothing here changes the cluster version.
+- Karpenter is a normal Deployment plus AWS plumbing: a node role, six controller policies, an SQS interruption queue, EventBridge rules and one Pod Identity association. Nothing here changes the cluster version.
 - It runs on the managed node group, so it never has to provision the node it runs on.
 - You own its upgrades. Check the compatibility matrix before you upgrade the cluster.
 

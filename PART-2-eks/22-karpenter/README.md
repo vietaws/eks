@@ -4,8 +4,7 @@
 Replace node group + Cluster Autoscaler with **Karpenter**: a just-in-time node provisioner that talks to the
 EC2 API directly, picks the cheapest instance that fits the pending pods, and consolidates to save cost.
 
-> ✅ Targets **Karpenter 1.15.x** (stable `karpenter.sh/v1` API) on **EKS 1.37**, with the **AL2023** AMI
-> family and **EKS Pod Identity**. 1.15.x supports Kubernetes 1.36 and 1.37 (see the
+> ✅ Targets **Karpenter 1.15.x** (stable `karpenter.sh/v1` API) on **EKS 1.37**, with the **AL2023** AMI family and **EKS Pod Identity**. 1.15.x supports Kubernetes 1.36 and 1.37 (see the
 > [compatibility matrix](https://karpenter.sh/docs/upgrading/compatibility/)).
 
 Latest Karpenter Release: https://github.com/aws/karpenter-provider-aws/releases
@@ -45,10 +44,11 @@ Focus: **scaling and replacing nodes**. The EKS control plane upgrade is a separ
 
 ## 🚀 Steps
 ```bash
-export AWS_REGION=ap-southeast-1 CLUSTER_NAME=eksdemo
-(cd ../02-create-eks-cluster && ./scripts/up.sh --mode=standard)    # cluster, about 15-20 min
-./scripts/install-karpenter.sh                                    # Karpenter 1.15.3
+(cd ../02-create-eks-cluster && ./scripts/up.sh --mode=standard --cluster-name=eksdemo --region=ap-southeast-1)   # about 15-20 min
+./scripts/install-karpenter.sh --cluster-name=eksdemo --region=ap-southeast-1                                      # Karpenter 1.15.3
+export CLUSTER_NAME=eksdemo AWS_REGION=ap-southeast-1                                                              # used by envsubst in the next demos
 ```
+Use the same `--cluster-name` and `--region` for both scripts. Without flags both default to `eksdemo` and `ap-southeast-1`.
 Then follow `02-implement` → `03-consolidation` → `04-drift` → `05-expired` → `06-spot-availability`. Upgrading a cluster that runs Karpenter is
 covered once, for all compute types, in `../33-cluster-upgrade`.
 
@@ -62,15 +62,10 @@ kubectl logs -f -n kube-system -l app.kubernetes.io/name=karpenter -c controller
 ```bash
 (cd ../02-create-eks-cluster && ./scripts/down.sh --cluster-name=eksdemo)
 ```
-`down.sh` removes the NodePools and their nodes, the Helm release, launch templates and the
-`Karpenter-<cluster>` CloudFormation stack before it deletes the cluster.
+`down.sh` removes the NodePools and their nodes, the Helm release, launch templates and the `Karpenter-<cluster>` CloudFormation stack before it deletes the cluster.
 
 ## 📝 Notes & cost
-- **Why Karpenter over Cluster Autoscaler:** no ASG round trip, no per-variant node groups, native bin-packing,
-  built-in Spot handling, consolidation.
+- **Why Karpenter over Cluster Autoscaler:** no ASG round trip, no per-variant node groups, native bin-packing, built-in Spot handling, consolidation.
 - Biggest cost levers: allow **Spot + on-demand**, allow **amd64 + arm64** (Graviton), and use
   `consolidationPolicy: WhenEmptyOrUnderutilized` (or `Balanced`).
-- Karpenter is **self-managed**: you upgrade it, keep it compatible with your Kubernetes version, and run it on
-  nodes that it does not manage. `../32-auto-mode` shows the AWS-managed alternative.
-- ⚠️ **Not tested against a live AWS account.** Manifests validate against the Karpenter 1.15.3 CRD schemas,
-  and the script passes `shellcheck`. Report any behavior that differs from these READMEs.
+- Karpenter is **self-managed**: you upgrade it, keep it compatible with your Kubernetes version, and run it on nodes that it does not manage. `../32-auto-mode` shows the AWS-managed alternative.
