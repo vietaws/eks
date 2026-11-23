@@ -81,19 +81,22 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 # Create the repository once
 aws ecr create-repository --repository-name demo --region ap-southeast-1
 
+# Set your AWS account ID
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
 # Log in to the registry
 aws ecr get-login-password --region ap-southeast-1 | \
   docker login --username AWS --password-stdin \
-  274595021951.dkr.ecr.ap-southeast-1.amazonaws.com
+  $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com
 
 # Build and push
 docker buildx build --platform linux/amd64,linux/arm64 \
-  -t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 \
-  -t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:latest --push .
+  -t $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 \
+  -t $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:latest --push .
 
 
 docker buildx build --platform linux/amd64,linux/arm64 \
--t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v2 \
+-t $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v2 \
 --build-arg APP_VERSION=2 --push .
 ```
 
@@ -101,7 +104,7 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 ```sh
 docker buildx build --platform linux/amd64,linux/arm64 \
   -t vietaws/demo:v1 \
-  -t 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 --push .
+  -t $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 --push .
 ```
 
 **Verify**
@@ -114,7 +117,7 @@ aws ecr describe-images --repository-name demo --region ap-southeast-1
 ```sh
 docker build -t demo .
 docker tag demo vietaws/demo:v1 && docker push vietaws/demo:v1
-docker tag demo 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 && docker push 274595021951.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1
+docker tag demo $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1 && docker push $ACCOUNT_ID.dkr.ecr.ap-southeast-1.amazonaws.com/demo:v1
 ```
 
 Notes:

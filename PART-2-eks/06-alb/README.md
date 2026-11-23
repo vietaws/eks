@@ -29,12 +29,13 @@ aws iam create-policy \
   --policy-name AWSLoadBalancerControllerIAMPolicy \
   --policy-document file://iam_policy.json
 
-# 2. IRSA service account (replace ACCOUNT_ID and cluster name)
+# 2. IRSA service account (replace cluster name)
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 eksctl create iamserviceaccount \
   --cluster=vietvn --namespace=kube-system \
   --name=aws-load-balancer-controller \
   --role-name AmazonEKSLoadBalancerControllerRole \
-  --attach-policy-arn=arn:aws:iam::274595021951:policy/AWSLoadBalancerControllerIAMPolicy \
+  --attach-policy-arn=arn:aws:iam::$ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
   --override-existing-serviceaccounts --approve
 
 # 3. Install via Helm

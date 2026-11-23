@@ -20,18 +20,19 @@ Ingress/Service (hostname annotation)
 # 1. IAM policy (AllowExternalDNSUpdates) — route53 change + list permissions
 #    See the policy JSON in this README.
 
-# 2. IRSA service account (replace cluster + policy ARN placeholders)
+# 2. IRSA service account (replace cluster name)
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 eksctl create iamserviceaccount \
   --name external-dns --namespace default \
   --cluster vietvn \
-  --attach-policy-arn arn:aws:iam::274595021951:policy/AllowExternalDNSUpdates \
+  --attach-policy-arn arn:aws:iam::$ACCOUNT_ID:policy/AllowExternalDNSUpdates \
   --approve --override-existing-serviceaccounts
 
 # 3. Deploy ExternalDNS
 #    Edit manifests/01-external-dns.yaml:
-#      - set eks.amazonaws.com/role-arn to YOUR role ARN (ACCOUNT_ID placeholder)
+#      - set the role name in eks.amazonaws.com/role-arn (account ID comes from $ACCOUNT_ID)
 #      - pin the image to the latest external-dns release
-kubectl apply -f ./manifests
+for f in ./manifests/*.yaml; do envsubst < "$f" | kubectl apply -f -; done
 ```
 
 ## 🔍 Validation

@@ -1,3 +1,4 @@
+# Apply with: export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text); envsubst < 01-external-dns.yaml | kubectl apply -f -
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -8,7 +9,7 @@ metadata:
     # Substitute your account ID and IAM service role name below.
 
     #TODO 1: Replace with your IAM ARN Role for external-dns
-    eks.amazonaws.com/role-arn: arn:aws:iam::274595021951:role/eksctl-vietvn-addon-iamserviceaccount-default-Role1-SWj32Uz8IjFD
+    eks.amazonaws.com/role-arn: arn:aws:iam::${ACCOUNT_ID}:role/eksctl-vietvn-addon-iamserviceaccount-default-Role1-SWj32Uz8IjFD
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

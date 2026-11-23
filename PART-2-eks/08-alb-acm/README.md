@@ -17,12 +17,13 @@ Client ──HTTP:80 ───▶ ALB
 1. Request/validate an ACM cert for your domain (DNS validation is easiest).
 2. Edit `manifests/05-alb.yaml` and set the certificate ARN placeholder:
    ```yaml
-   alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:ACCOUNT_ID:certificate/CERT_ID
+   alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:${ACCOUNT_ID}:certificate/CERT_ID
    ```
    > ⚠️ Use **your own** ARN. Never commit a real account ID / cert ARN.
 3. Apply:
    ```bash
-   kubectl apply -f ./manifests
+   export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+   for f in ./manifests/*.yaml; do envsubst < "$f" | kubectl apply -f -; done
    ```
 
 ## 🔍 Validation

@@ -2,9 +2,7 @@
 
 ## 🎯 Scenario
 **EKS Auto Mode** lets AWS run compute, pod networking, load balancing, DNS and block storage for the cluster.
-You create the cluster, deploy workloads, and nodes, load balancers and volumes appear. This demo shows what
-that means in practice and how it differs from the self-managed Karpenter in `22-karpenter`. Upgrades are compared in
-`33-cluster-upgrade`.
+You create the cluster, deploy workloads, and nodes, load balancers and volumes appear. This demo shows what that means in practice and how it differs from the self-managed Karpenter in `22-karpenter`. Upgrades are compared in `33-cluster-upgrade`.
 
 > ✅ Targets **EKS 1.37**. Auto Mode is Karpenter-based, so the NodePool API (`karpenter.sh/v1`) looks familiar.
 

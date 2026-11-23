@@ -117,7 +117,8 @@ eksctl delete nodegroup --cluster "$CLUSTER_NAME" --name "${CLUSTER_NAME}-ng" --
 source scripts/env.sh mng
 ../02-create-eks-cluster/scripts/down.sh --cluster-name=upg-mng --region=ap-southeast-1   # type "yes" to confirm
 
-aws iam delete-policy --policy-arn arn:aws:iam::274595021951:policy/AWSLoadBalancerControllerIAMPolicy-upg-mng
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+aws iam delete-policy --policy-arn arn:aws:iam::$ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy-upg-mng
 ```
 
 Do that only if you don't need it for side-by-side comparison. After upg-mng, continue with upg-karp, then upg-auto.

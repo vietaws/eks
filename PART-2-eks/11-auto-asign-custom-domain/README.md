@@ -22,7 +22,8 @@ Ingress (external-dns.kubernetes.io/hostname: demo.<your-domain>)
    - set `external-dns.kubernetes.io/hostname` to **your** domain.
 2. Apply:
    ```bash
-   kubectl apply -R -f ./manifests
+   export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+   for f in $(find ./manifests -name "*.yaml"); do envsubst < "$f" | kubectl apply -f -; done
    ```
 
 ## 🔍 Validation
