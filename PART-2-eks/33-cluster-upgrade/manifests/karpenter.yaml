@@ -14,6 +14,8 @@ spec:
   securityGroupSelectorTerms:
     - tags:
         karpenter.sh/discovery: "${CLUSTER_NAME}"
+    - tags: # EKS cluster SG: the LB controller needs it on node ENIs to open IP-target NLB/ALB traffic
+        kubernetes.io/cluster/${CLUSTER_NAME}: owned
 ---
 apiVersion: karpenter.sh/v1
 kind: NodePool

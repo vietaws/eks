@@ -31,17 +31,29 @@ export AWS_REGION=ap-southeast-1 CLUSTER_NAME=eksauto
 
 ### 1. An empty cluster that is ready to schedule
 ```bash
-kubectl get nodes                               # No resources found: Auto Mode creates nodes on demand
-kubectl get nodepools                           # general-purpose, system (built in, you cannot edit them)
+
+# No resources found: Auto Mode creates nodes on demand
+kubectl get nodes                               
+
+# Check EC2 Instance created by Auto-Mode
+aws ec2 describe-instances --include-managed-resources
+
+# general-purpose, system (built in, you cannot edit them)
+kubectl get nodepools                           
 kubectl get nodeclasses                         # default
-kubectl get pods,ds,deploy -A                   # nothing: no aws-node, kube-proxy, coredns, karpenter or LB controller pods
+
+# nothing: no aws-node, kube-proxy, coredns, karpenter or LB controller pods
+
+kubectl get pods,ds,deploy -A                   
 kubectl get nodepool general-purpose -o yaml | grep -A12 -E 'disruption|expireAfter'
 ```
 
 ### 2. Compute: a pending pod gets a node
 ```bash
 kubectl apply -f manifests/01-app.yaml
-kubectl get pods -w                             # Pending, then ContainerCreating, then Running (about 1 minute)
+
+# Pending, then ContainerCreating, then Running (about 1 minute)
+kubectl get pods -w                             
 kubectl get nodeclaims,nodes -o wide
 kubectl get nodes -L eks.amazonaws.com/compute-type,node.kubernetes.io/instance-type,karpenter.sh/capacity-type
 ```
@@ -74,9 +86,7 @@ kubectl scale deployment inflate --replicas 0   # empty nodes are consolidated a
 kubectl get nodepool general-purpose -o jsonpath='{.spec.template.spec.expireAfter}{"\n"}{.spec.disruption}{"\n"}'
 kubectl get nodes -o custom-columns=NAME:.metadata.name,CREATED:.metadata.creationTimestamp
 ```
-Defaults per the AWS docs: underutilized nodes are consolidated, nodes are terminated after 336 hours
-(maximum 21 days), a disruption budget of 10% of nodes applies, and nodes drift when a new Auto Mode AMI is
-released, roughly weekly.
+Defaults per the AWS docs: underutilized nodes are consolidated, nodes are terminated after 336 hours (maximum 21 days), a disruption budget of 10% of nodes applies, and nodes drift when a new Auto Mode AMI is released, roughly weekly.
 
 ## 🔍 Validation
 | Check | Expected |
@@ -93,9 +103,6 @@ kubectl delete -f manifests/ --ignore-not-found       # NLB and EBS volume are r
 ```
 
 ## 📝 Notes & cost
-- Auto Mode charges a **management fee per EC2 instance-hour on top of the EC2 price**. Spot, Savings Plans and
-  Reserved Instances reduce the EC2 part but not the fee. Current numbers: https://aws.amazon.com/eks/pricing/.
+- Auto Mode charges a **management fee per EC2 instance-hour on top of the EC2 price**. Spot, Savings Plans and Reserved Instances reduce the EC2 part but not the fee. Current numbers: https://aws.amazon.com/eks/pricing/.
 - Auto Mode does not create a default StorageClass. Create one that uses `ebs.csi.eks.amazonaws.com`.
 - Auto Mode nodes are in the private subnets, so the cluster has one NAT gateway (billed per hour and per GB).
-- ⚠️ **Not tested against a live AWS account.** Commands follow the EKS User Guide topics for Auto Mode
-  (`automode`, `create-storage-class`, `auto-configure-nlb`). Report any difference.

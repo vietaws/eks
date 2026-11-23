@@ -2,7 +2,7 @@
 # Hourly burn rate and window cost of the three demo clusters, from what is running RIGHT NOW.
 # Prices come from the AWS Price List API (us-east-1 endpoint), never from constants in this script. When the API does not
 # return a price, set the matching variable from the pricing pages and the table stays complete:
-#   EC2_HOURLY_<type with . replaced by _>  e.g. EC2_HOURLY_t9g_small=0.0xx
+#   EC2_HOURLY_<type with . replaced by _>  e.g. EC2_HOURLY_t9g_medium=0.0xx
 #   EKS_CLUSTER_HOURLY, AUTO_FEE_HOURLY (per instance-hour, depends on the instance type), NAT_HOURLY, NLB_HOURLY
 # Pricing pages: https://aws.amazon.com/eks/pricing/  https://aws.amazon.com/ec2/pricing/on-demand/
 #                https://aws.amazon.com/vpc/pricing/  https://aws.amazon.com/elasticloadbalancing/pricing/

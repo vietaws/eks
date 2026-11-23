@@ -14,7 +14,7 @@ export CLUSTER_KEY="$_target"
 export AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 export OLD_VERSION="${OLD_VERSION:-1.36}"
 export NEW_VERSION="${NEW_VERSION:-1.37}"
-export NODE_TYPE="${NODE_TYPE:-t9g.small}"      # fall back to t4g.small for every cluster if a mode rejects it
+export NODE_TYPE="${NODE_TYPE:-t9g.medium}"      # Auto Mode rejects t9g: its pool uses AUTO_NODE_TYPE (default t4g.medium)
 export KUBECONFIG="$HOME/.kube/${CLUSTER_NAME}.config"
 DEMO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 export DEMO_DIR

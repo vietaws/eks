@@ -2,7 +2,7 @@
 #  - 3 replicas on separate nodes (hostname spread), spread over zones when possible
 #  - readiness probe, preStop delay longer than the load balancer deregistration delay
 #  - PDB: one pod at a time. Rolling update never drops below capacity
-# On t9g.small (2 vCPU, 2 GiB) the request below leaves room for the system pods on each node.
+# On t9g.medium (2 vCPU, 4 GiB) the request below leaves room for the system pods on each node.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +32,7 @@ spec:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: DoNotSchedule
+          matchLabelKeys: ["pod-template-hash"] # count only pods of the same revision, so old pods in a rollout do not skew the spread
           labelSelector:
             matchLabels:
               app: web

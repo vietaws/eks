@@ -24,8 +24,11 @@ if ! aws iam get-policy --policy-arn "$POLICY_ARN" >/dev/null 2>&1; then
 fi
 
 echo "==> Pod Identity association"
-if ! eksctl get podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
-    --namespace kube-system --service-account-name aws-load-balancer-controller >/dev/null 2>&1; then
+# eksctl exits 0 even when nothing matches, so test the number of associations returned, not the exit code.
+EXISTING="$(eksctl get podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
+    --namespace kube-system --service-account-name aws-load-balancer-controller -o json 2>/dev/null \
+    | { command -v jq >/dev/null && jq 'length' || echo 0; } || echo 0)"
+if [ "${EXISTING:-0}" = "0" ]; then
   eksctl create podidentityassociation --cluster "$CLUSTER_NAME" --region "$AWS_REGION" \
     --namespace kube-system --service-account-name aws-load-balancer-controller \
     --role-name "${CLUSTER_NAME}-lbc" --permission-policy-arns "$POLICY_ARN"

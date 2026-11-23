@@ -46,8 +46,13 @@ Auto Mode:     AWS ─► managed Karpenter outside your nodes   ─► NodePool
 ### 1. Create a custom NodePool on Auto Mode (Spot + Graviton)
 ```bash
 kubectl apply -f manifests/nodepool-spot-arm.yaml
-kubectl get nodepools                                  # spot-arm appears next to the two built-in pools
+# spot-arm appears next to the two built-in pools
+kubectl get nodepools      
+
+kubectl get deployment
+
 kubectl scale deployment batch --replicas 3
+kubectl scale deployment batch --replicas 0
 kubectl get nodeclaims -o wide -w                      # one arm64 Spot node, labelled workload=batch
 kubectl get nodes -L workload,kubernetes.io/arch,karpenter.sh/capacity-type
 ```
@@ -60,15 +65,8 @@ diff <(sed -n '/nodeClassRef/,/name:/p' ../../22-karpenter/02-implement/manifest
 ```
 Only three things change: `nodeClassRef` (`group`, `kind`), the label prefix (`eks.amazonaws.com/`), and no `kubernetes.io/os` requirement.
 
-### 3. Try what Auto Mode will not let you do
-```bash
-kubectl edit nodepool general-purpose          # rejected or reverted: built-in pools are owned by AWS
-NODE=$(kubectl get nodes -l workload=batch -o jsonpath='{.items[0].metadata.name}')
-kubectl debug node/$NODE -it --image=public.ecr.aws/docker/library/busybox:stable -- sh   # a debug pod on the node, not SSH or SSM (admission rules may restrict it)
-```
-Then repeat on the Karpenter cluster: add `ssh`/SSM access, change `amiSelectorTerms`, set `userData`.
 
-### 4. Record what you observed
+### 3. Record what you observed
 | Metric | Karpenter | Auto Mode |
 |--------|-----------|-----------|
 | Pods to install before first workload | controller (2) + IAM + SQS | 0 |

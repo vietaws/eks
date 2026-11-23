@@ -3,14 +3,14 @@
 #   upg-mng   managed node group only
 #   upg-karp  small managed node group (hosts Karpenter) + Karpenter, pinned AMI
 #   upg-auto  EKS Auto Mode
-# All nodes use NODE_TYPE (default t9g.small). Three control planes, NAT gateways and node sets bill together.
+# All nodes use NODE_TYPE (default t9g.medium). Three control planes, NAT gateways and node sets bill together.
 #
 # Usage: [AWS_PROFILE=..] [NODE_TYPE=..] ./scripts/up-all.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 OLD_VERSION="${OLD_VERSION:-1.36}"
-NODE_TYPE="${NODE_TYPE:-t9g.small}"
+NODE_TYPE="${NODE_TYPE:-t9g.medium}"
 SHARED="../02-create-eks-cluster/scripts/up.sh"
 LOGS="${TMPDIR:-/tmp}/upg-logs"
 mkdir -p "$LOGS"
@@ -43,7 +43,8 @@ prep_karp() {
 }
 prep_auto() {
   export KUBECONFIG="$HOME/.kube/upg-auto.config" CLUSTER_NAME=upg-auto
-  NODE_TYPE="$NODE_TYPE" envsubst '${NODE_TYPE}' <manifests/automode-nodepool.yaml | kubectl apply -f -
+  # Auto Mode never launches nano/micro/small sizes and does not offer t9g, so its pool uses AUTO_NODE_TYPE.
+  NODE_TYPE="${AUTO_NODE_TYPE:-t4g.medium}" envsubst '${NODE_TYPE}' <manifests/automode-nodepool.yaml | kubectl apply -f -
 }
 pids=()
 prep_mng  >"$LOGS/prep-mng.log"  2>&1 & pids+=($!)

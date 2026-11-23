@@ -8,6 +8,8 @@ that means in practice and how it differs from the self-managed Karpenter in `22
 
 > ✅ Targets **EKS 1.37**. Auto Mode is Karpenter-based, so the NodePool API (`karpenter.sh/v1`) looks familiar.
 
+> Supported Instance types: https://docs.aws.amazon.com/eks/latest/userguide/automode-learn-instances.html
+
 ## 🗺️ Sub-demos
 | Step | Folder | Teaches |
 |------|--------|---------|

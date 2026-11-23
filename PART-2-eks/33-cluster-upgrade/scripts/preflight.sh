@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Pre-upgrade checks. Exit code 1 when a BLOCKER is found, 0 otherwise (warnings do not fail the run).
-#   BLOCKER: EKS upgrade-readiness insights in ERROR, PDBs that allow zero disruptions, nodes older than the
-#            kubelet skew allows, kubectl more than one minor away from the cluster
+#   BLOCKER: EKS upgrade-readiness insights in ERROR, PDBs that allow zero disruptions, nodes older than the kubelet skew allows, kubectl more than one minor away from the cluster
 #   WARN:    single-replica workloads, webhooks with failurePolicy Fail, workloads without a readiness probe,
 #            EKS add-ons without a version for the target release
 # Usage: source scripts/env.sh <mng|karp|auto>; ./scripts/preflight.sh [target-version]     (default NEW_VERSION)
